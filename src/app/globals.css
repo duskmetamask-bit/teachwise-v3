@@ -1,0 +1,90 @@
+@import 'tailwindcss';
+
+/* ─── Theme tokens ────────────────────────────────────────────────────────
+   Dark default, light override. ThemeProvider toggles `data-theme` on <html>.
+   Tokens are exposed to Tailwind via @theme inline so you can write
+   `bg-surface`, `text-fg-muted`, `border-border-subtle`, etc. in markup.
+*/
+
+:root,
+[data-theme='dark'] {
+  --background: #0a0a0f;
+  --surface: #13131a;
+  --surface-raised: #1c1c26;
+  --border: #2a2a36;
+  --border-subtle: #1f1f29;
+
+  --fg: #ededf2;
+  --fg-muted: #9a9aae;
+  --fg-subtle: #6b6b7d;
+
+  --accent: #a78bfa;
+  --accent-hover: #8b5cf6;
+  --accent-fg: #0a0a0f;
+
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+}
+
+[data-theme='light'] {
+  --background: #fafafa;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --border: #e5e5ec;
+  --border-subtle: #f0f0f5;
+
+  --fg: #1a1a24;
+  --fg-muted: #5c5c6e;
+  --fg-subtle: #8a8a9c;
+
+  --accent: #7c3aed;
+  --accent-hover: #6d28d9;
+  --accent-fg: #ffffff;
+}
+
+@theme inline {
+  --color-bg: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--fg);
+  font-family:
+    var(--font-geist-sans),
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  border-color: var(--border);
+}
