@@ -16,3 +16,13 @@ export {
   type PlannerState,
   type ParsedPlan,
 } from '@/lib/ai/prompts/planner';
+export {
+  UnitLessonSchema,
+  UnitPlanSchema,
+  unitSystemPrompt,
+  unitUserPrompt,
+  unitLessonRegenPrompt,
+  parseUnitResponse,
+  type UnitLesson,
+  type UnitPlan,
+} from '@/lib/ai/prompts/units';
