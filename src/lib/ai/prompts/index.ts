@@ -1,6 +1,17 @@
 export { agentSystemPrompt } from '@/lib/ai/prompts/agent';
 export { unitPlanSystemPrompt } from '@/lib/ai/prompts/unit-plan';
-export { rubricSystemPrompt } from '@/lib/ai/prompts/rubric';
+export {
+  RubricLevelSchema,
+  RubricCriterionSchema,
+  RubricSchema,
+  rubricSystemPrompt,
+  rubricUserPrompt,
+  rubricCriterionRegenPrompt,
+  parseRubricResponse,
+  type Rubric,
+  type RubricLevel,
+  type RubricCriterion,
+} from '@/lib/ai/prompts/rubric';
 export { automarkSystemPrompt } from '@/lib/ai/prompts/automark';
 export {
   PLANNER_BLOCK_KINDS,
