@@ -59,7 +59,7 @@ export async function POST(req: NextRequest): Promise<Response> {
           content: unitUserPrompt(parsed.data.topic, parsed.data.weeks, parsed.data.lessonsPerWeek),
         },
       ],
-      maxTokens: 12000,
+      maxTokens: 8000,
       temperature: 0.7,
     });
 
