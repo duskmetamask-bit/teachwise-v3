@@ -2,19 +2,27 @@ import { z } from 'zod';
 import { Err, Ok, type Result, type AiError } from '@/lib/ai';
 
 // ─── Config ───────────────────────────────────────────────────────────────
-// TODO: confirm the MiniMax image endpoint with the user. The v2 codebase
-// only wired text (api.minimax.io/anthropic/v1/messages). Until the image
-// gateway is confirmed, this is a placeholder structure that you can fill
-// in once you have the real URL + model name.
-const IMAGE_GATEWAY =
-  process.env.MINIMAX_IMAGE_URL ?? 'https://api.minimax.io/v1/images/generations';
-const DEFAULT_IMAGE_MODEL = process.env.MINIMAX_IMAGE_MODEL ?? 'MiniMax-Image-01';
+const IMAGE_GATEWAY = process.env.MINIMAX_IMAGE_URL ?? 'https://api.minimax.io/v1/image_generation';
+const DEFAULT_IMAGE_MODEL = process.env.MINIMAX_IMAGE_MODEL ?? 'image-01';
 
 // ─── Schemas ──────────────────────────────────────────────────────────────
+export const ImageAspectRatioSchema = z.enum([
+  '1:1',
+  '16:9',
+  '4:3',
+  '3:2',
+  '2:3',
+  '3:4',
+  '9:16',
+  '21:9',
+]);
+export type ImageAspectRatio = z.infer<typeof ImageAspectRatioSchema>;
+
 export const ImageGenInputSchema = z.object({
-  prompt: z.string().min(1).max(2000),
-  size: z.enum(['1024x1024', '1024x1792', '1792x1024']).default('1024x1024'),
+  prompt: z.string().min(1).max(1500),
+  aspectRatio: ImageAspectRatioSchema.default('1:1'),
   count: z.number().int().min(1).max(4).default(1),
+  promptOptimizer: z.boolean().default(true),
 });
 export type ImageGenInput = z.infer<typeof ImageGenInputSchema>;
 
@@ -29,6 +37,9 @@ export type ImageGenOutput = z.infer<typeof ImageGenOutputSchema>;
  * Generate images from a text prompt. Returns a Result so callers must
  * handle errors explicitly. Used by the planner (block illustrations) and
  * the units page (cover art) and the chat ("create an image of..." command).
+ *
+ * MiniMax image-01: `https://api.minimax.io/v1/image_generation`.
+ * Returns a `data.image_urls` array of CDN URLs that expire in 24h.
  */
 export async function generateImage(
   input: ImageGenInput,
@@ -54,8 +65,10 @@ export async function generateImage(
       body: JSON.stringify({
         model: DEFAULT_IMAGE_MODEL,
         prompt: parsed.data.prompt,
-        size: parsed.data.size,
+        aspect_ratio: parsed.data.aspectRatio,
         n: parsed.data.count,
+        response_format: 'url',
+        prompt_optimizer: parsed.data.promptOptimizer,
       }),
     });
   } catch (error) {
@@ -74,23 +87,22 @@ export async function generateImage(
     return Err({ kind: 'upstream', status: response.status, message: text });
   }
 
-  // OpenAI-style response shape: { data: [{ url }, ...] }.
-  // TODO: verify this matches the actual MiniMax image gateway response.
   const json = (await response.json()) as {
-    data?: Array<{ url?: string; revised_prompt?: string }>;
+    data?: { image_urls?: string[]; image_base64?: string[] };
+    metadata?: { revised_prompt?: string };
   };
-  const urls = (json.data ?? [])
-    .map((entry) => entry.url)
-    .filter((url): url is string => typeof url === 'string');
+
+  const urls = (json.data?.image_urls ?? []).filter(
+    (url): url is string => typeof url === 'string' && url.length > 0,
+  );
 
   if (urls.length === 0) {
     return Err({ kind: 'parse', message: 'No image URLs in upstream response.' });
   }
 
+  const revisedPrompt = json.metadata?.revised_prompt;
   return Ok({
     urls,
-    ...(json.data?.[0]?.revised_prompt !== undefined
-      ? { revisedPrompt: json.data[0].revised_prompt }
-      : {}),
+    ...(typeof revisedPrompt === 'string' ? { revisedPrompt } : {}),
   });
 }
