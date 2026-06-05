@@ -59,8 +59,8 @@ const FEATURES: readonly Feature[] = [
     name: 'Profile',
     description: 'Year level, subject, state, and class context that shapes every AI output.',
     icon: User,
-    status: 'phase-3',
-    href: null,
+    status: 'live',
+    href: '/profile',
   },
 ] as const;
 
@@ -82,13 +82,14 @@ export default function Home() {
       <div className="mb-10">
         <div className="text-fg-muted mb-2 flex items-center gap-2 text-xs font-medium tracking-wide uppercase">
           <Sparkles className="text-accent h-3.5 w-3.5" />
-          Phase 3 · Chat feature live
+          Phase 3 · Chat + Profile live
         </div>
         <h1 className="text-fg text-3xl font-semibold tracking-tight sm:text-4xl">TeachWise v3</h1>
         <p className="text-fg-muted mt-3 max-w-2xl text-sm leading-relaxed sm:text-base">
           AI teacher workspace for Australian F-6 teachers. Six features, three modalities (text,
-          image, speech), one teaching-agent orchestrator. Chat is the first feature live — the
-          agent streams M3 responses, with quick actions, markdown rendering, and docx export.
+          image, speech), one teaching-agent orchestrator. Chat and Profile are live — the agent
+          streams M3 responses with your profile context injected into every prompt, plus quick
+          actions, markdown rendering, and docx export.
         </p>
       </div>
 
@@ -128,9 +129,8 @@ export default function Home() {
       <section className="border-border-subtle bg-surface-raised mt-10 rounded-xl border p-6">
         <h2 className="text-fg text-sm font-semibold tracking-wide uppercase">Next up</h2>
         <ul className="text-fg-muted mt-3 space-y-2 text-sm">
-          <li>· Confirm the MiniMax image + speech gateway URLs and model names.</li>
-          <li>· Phase 3: build planner (block-based + voice input + image per block).</li>
-          <li>· Phase 3: build units, rubrics, automark, profile.</li>
+          <li>· Phase 3: build planner (block-based + image per block; STT deferred).</li>
+          <li>· Phase 3: build units, rubrics, automark.</li>
           <li>· Phase 4: add Clerk for per-teacher isolation, ship to the pilot.</li>
         </ul>
       </section>

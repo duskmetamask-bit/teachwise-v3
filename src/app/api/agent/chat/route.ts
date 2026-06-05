@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { streamText, type Message, type TeacherPrefs } from '@/lib/ai';
+import { streamText, TeacherPrefsSchema, type Message, type TeacherPrefs } from '@/lib/ai';
 import { agentSystemPrompt } from '@/lib/ai/prompts/agent';
 
 const ChatRequestSchema = z.object({
@@ -10,14 +10,7 @@ const ChatRequestSchema = z.object({
       content: z.string().min(1),
     }),
   ),
-  teacherPrefs: z
-    .object({
-      name: z.string().optional(),
-      yearLevel: z.string().optional(),
-      subject: z.string().optional(),
-      state: z.string().optional(),
-    })
-    .optional(),
+  teacherPrefs: TeacherPrefsSchema.optional(),
 });
 
 export async function POST(req: NextRequest): Promise<Response> {

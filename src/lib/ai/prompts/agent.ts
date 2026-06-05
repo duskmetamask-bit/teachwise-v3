@@ -6,6 +6,7 @@ function prefsBlock(prefs: TeacherPrefs): string {
   if (prefs.yearLevel) lines.push(`Year level: ${prefs.yearLevel}`);
   if (prefs.subject) lines.push(`Subject: ${prefs.subject}`);
   if (prefs.state) lines.push(`State: ${prefs.state}`);
+  if (prefs.classContext) lines.push(`Class context: ${prefs.classContext}`);
   return lines.length > 0 ? `\n\nTeacher context:\n${lines.join('\n')}` : '';
 }
 

@@ -1,13 +1,17 @@
 'use client';
 
-import { ArrowLeft, Download, Sparkles, Trash2 } from 'lucide-react';
+import { ArrowLeft, Download, Settings, Sparkles, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { ChatInput, Messages, QuickActions, exportConversationAsDocx } from '@/features/chat';
 import { useAgentChat } from '@/lib/use-agent-chat';
+import { useProfile } from '@/lib/use-profile';
 
 export default function ChatPage() {
-  const { messages, status, error, sendMessage, stop, reset } = useAgentChat();
+  const { profile } = useProfile();
+  const { messages, status, error, sendMessage, stop, reset } = useAgentChat({
+    teacherPrefs: profile,
+  });
   const [draft, setDraft] = useState('');
 
   const isBusy = status === 'sending' || status === 'streaming';
@@ -48,6 +52,14 @@ export default function ChatPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Link
+              href="/profile"
+              className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium"
+              aria-label="Edit profile"
+            >
+              <Settings className="h-3 w-3" />
+              Profile
+            </Link>
             {messages.length > 0 && (
               <button
                 type="button"

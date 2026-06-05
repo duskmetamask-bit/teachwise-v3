@@ -29,6 +29,7 @@ export const TeacherPrefsSchema = z.object({
   yearLevel: z.string().optional(),
   subject: z.string().optional(),
   state: z.string().optional(),
+  classContext: z.string().optional(),
 });
 export type TeacherPrefs = z.infer<typeof TeacherPrefsSchema>;
 
