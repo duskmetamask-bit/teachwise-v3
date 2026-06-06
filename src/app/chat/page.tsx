@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { ChatInput, Messages, QuickActions, exportConversationAsDocx } from '@/features/chat';
 import { useAgentChat } from '@/lib/use-agent-chat';
 import { useProfile } from '@/lib/use-profile';
+import { FadeIn, FadeInUp, StaggerContainer } from '@/components/ui/motion';
 
 export default function ChatPage() {
   const { profile } = useProfile();
@@ -35,7 +36,7 @@ export default function ChatPage() {
 
   return (
     <div className="bg-bg flex h-full flex-col">
-      <div className="border-border-subtle bg-surface border-b">
+      <div className="border-border-subtle bg-surface/80 supports-[backdrop-filter]:bg-surface/60 border-b backdrop-blur">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-3">
           <div className="flex items-center gap-3">
             <Link
@@ -87,29 +88,38 @@ export default function ChatPage() {
 
       <div className="mx-auto w-full max-w-4xl flex-1 overflow-y-auto px-6 py-8">
         {isEmpty ? (
-          <div className="flex flex-col gap-6">
-            <div>
-              <h1 className="text-fg text-2xl font-semibold tracking-tight sm:text-3xl">
-                What can I help with?
-              </h1>
-              <p className="text-fg-muted mt-2 text-sm">
-                Pick a quick action, or describe what you need. I&apos;ll draft lesson plans,
-                rubrics, report comments, parent emails, sub plans, and more.
-              </p>
-            </div>
-            <QuickActions onSelect={handleQuickAction} disabled={isBusy} />
-          </div>
+          <FadeIn className="flex flex-col gap-8">
+            <FadeInUp>
+              <div className="flex flex-col items-center gap-4 text-center">
+                <div className="bg-accent-soft text-accent flex h-14 w-14 items-center justify-center rounded-2xl">
+                  <Sparkles className="h-7 w-7" />
+                </div>
+                <div>
+                  <h1 className="text-fg text-3xl font-semibold tracking-tight sm:text-4xl">
+                    What can I help with?
+                  </h1>
+                  <p className="text-fg-muted mt-2 max-w-md text-sm leading-relaxed">
+                    Pick a quick action, or describe what you need. I&apos;ll draft lesson plans,
+                    rubrics, report comments, parent emails, sub plans, and more.
+                  </p>
+                </div>
+              </div>
+            </FadeInUp>
+            <StaggerContainer delay={0.06}>
+              <QuickActions onSelect={handleQuickAction} disabled={isBusy} />
+            </StaggerContainer>
+          </FadeIn>
         ) : (
           <Messages messages={messages} status={status} />
         )}
         {error && (
-          <div className="border-danger/30 bg-danger/10 text-danger mt-6 rounded-lg border px-4 py-3 text-sm">
+          <div className="border-danger/30 bg-danger-soft text-danger mt-6 rounded-lg border px-4 py-3 text-sm">
             {error}
           </div>
         )}
       </div>
 
-      <div className="border-border-subtle bg-surface border-t">
+      <div className="border-border-subtle bg-surface/80 supports-[backdrop-filter]:bg-surface/60 border-t backdrop-blur">
         <div className="mx-auto max-w-4xl px-6 py-4">
           <ChatInput
             value={draft}

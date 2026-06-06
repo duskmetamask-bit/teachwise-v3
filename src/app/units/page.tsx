@@ -7,6 +7,7 @@ import { LessonsList, UnitForm, UnitHeader, exportUnitAsDocx } from '@/features/
 import type { UnitLesson, UnitPlan } from '@/lib/ai/prompts/units';
 import { useProfile } from '@/lib/use-profile';
 import { useUnit } from '@/lib/use-unit';
+import { FadeIn, FadeInUp, Pulse } from '@/components/ui/motion';
 
 type Status = 'idle' | 'generating' | 'error';
 
@@ -120,97 +121,103 @@ export default function UnitsPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-8 sm:px-10">
-      <div className="mb-6 flex items-start justify-between gap-3">
-        <div>
-          <Link
-            href="/"
-            className="text-fg-muted hover:text-fg mb-3 inline-flex items-center gap-1.5 text-sm"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Home
-          </Link>
-          <div className="flex items-center gap-3">
-            <div className="bg-surface flex h-9 w-9 items-center justify-center rounded-md">
-              <BookOpen className="text-fg h-4.5 w-4.5" />
-            </div>
-            <div>
-              <h1 className="text-fg text-2xl font-semibold tracking-tight sm:text-3xl">
-                Unit planner
-              </h1>
-              <p className="text-fg-muted mt-1 text-sm">
-                Multi-week units aligned to AC9. Regenerate any lesson, add a cover image, export to
-                docx.
-              </p>
+      <FadeInUp>
+        <div className="mb-6 flex items-start justify-between gap-3">
+          <div>
+            <Link
+              href="/"
+              className="text-fg-muted hover:text-fg mb-3 inline-flex items-center gap-1.5 text-sm"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Home
+            </Link>
+            <div className="flex items-center gap-3">
+              <div className="bg-accent-soft text-accent flex h-10 w-10 items-center justify-center rounded-md">
+                <BookOpen className="h-5 w-5" />
+              </div>
+              <div>
+                <h1 className="text-fg text-3xl font-semibold tracking-tight sm:text-4xl">
+                  Unit planner
+                </h1>
+                <p className="text-fg-muted mt-1 text-sm">
+                  Multi-week units aligned to AC9. Regenerate any lesson, add a cover image, export
+                  to docx.
+                </p>
+              </div>
             </div>
           </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Link
+              href="/profile"
+              className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium"
+            >
+              <Settings className="h-3 w-3" />
+              Profile
+            </Link>
+            {hasPlan && (
+              <>
+                <button
+                  type="button"
+                  onClick={clear}
+                  className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium"
+                >
+                  <Trash2 className="h-3 w-3" />
+                  Clear
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExport}
+                  className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium"
+                >
+                  <Download className="h-3 w-3" />
+                  Export
+                </button>
+              </>
+            )}
+          </div>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <Link
-            href="/profile"
-            className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium"
-          >
-            <Settings className="h-3 w-3" />
-            Profile
-          </Link>
-          {hasPlan && (
-            <>
-              <button
-                type="button"
-                onClick={clear}
-                className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium"
-              >
-                <Trash2 className="h-3 w-3" />
-                Clear
-              </button>
-              <button
-                type="button"
-                onClick={handleExport}
-                className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium"
-              >
-                <Download className="h-3 w-3" />
-                Export
-              </button>
-            </>
-          )}
-        </div>
-      </div>
+      </FadeInUp>
 
-      <UnitForm
-        initialTopic={state.topic}
-        initialWeeks={state.weeks}
-        initialLessonsPerWeek={state.lessonsPerWeek}
-        isBusy={isBusy}
-        onSubmit={handleGenerate}
-      />
+      <FadeIn delay={0.05}>
+        <UnitForm
+          initialTopic={state.topic}
+          initialWeeks={state.weeks}
+          initialLessonsPerWeek={state.lessonsPerWeek}
+          isBusy={isBusy}
+          onSubmit={handleGenerate}
+        />
+      </FadeIn>
 
       {status === 'generating' && (
-        <div className="text-fg-muted mt-6 flex items-center gap-2 text-sm">
-          <Loader2 className="text-accent h-4 w-4 animate-spin" />
+        <FadeIn className="text-fg-muted mt-6 flex items-center gap-2 text-sm">
+          <Pulse>
+            <Loader2 className="text-accent h-4 w-4" />
+          </Pulse>
           Drafting the unit plan…
-        </div>
+        </FadeIn>
       )}
 
       {error && status === 'error' && (
-        <div className="border-danger/30 bg-danger/10 text-danger mt-6 rounded-lg border px-4 py-3 text-sm">
+        <FadeIn className="border-danger/30 bg-danger-soft text-danger mt-6 rounded-lg border px-4 py-3 text-sm">
           {error}
-        </div>
+        </FadeIn>
       )}
 
       {hasPlan && state.plan && (
-        <div className="mt-8 flex flex-col gap-8">
+        <FadeInUp delay={0.1} className="mt-8 flex flex-col gap-8">
           <UnitHeader plan={state.plan} topic={state.topic} onGenerateCover={handleGenerateCover} />
           <LessonsList
             lessons={state.plan.lessons}
             onRegenerateLesson={handleRegenerateLesson}
             onEditLesson={handleEditLesson}
           />
-        </div>
+        </FadeInUp>
       )}
 
       {!hasPlan && status === 'idle' && (
-        <p className="text-fg-muted mt-6 text-xs">
+        <FadeIn delay={0.2} className="text-fg-muted mt-6 text-xs">
           Stored locally in this browser. Multi-teacher isolation arrives in Phase 4 with Clerk.
-        </p>
+        </FadeIn>
       )}
     </div>
   );

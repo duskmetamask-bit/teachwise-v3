@@ -1,9 +1,11 @@
 'use client';
 
+import { AnimatePresence, motion } from 'framer-motion';
 import { Bot, User } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Message } from '@/lib/ai';
+import { fadeInUp } from '@/lib/motion';
 
 type MessagesProps = {
   messages: Message[];
@@ -17,49 +19,58 @@ export function Messages({ messages, status }: MessagesProps) {
 
   return (
     <ol className="flex flex-col gap-6">
-      {messages.map((message, index) => {
-        const isUser = message.role === 'user';
-        const isLast = index === messages.length - 1;
-        const isStreamingPlaceholder =
-          !isUser && isLast && status === 'streaming' && message.content === '';
+      <AnimatePresence initial={false}>
+        {messages.map((message, index) => {
+          const isUser = message.role === 'user';
+          const isLast = index === messages.length - 1;
+          const isStreamingPlaceholder =
+            !isUser && isLast && status === 'streaming' && message.content === '';
 
-        return (
-          <li
-            key={`${message.role}-${index}`}
-            className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
-          >
-            <div
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                isUser
-                  ? 'bg-accent text-accent-fg'
-                  : 'bg-surface-raised border-border-subtle border'
-              }`}
+          return (
+            <motion.li
+              key={`${message.role}-${index}`}
+              layout
+              variants={fadeInUp}
+              initial="hidden"
+              animate="visible"
+              exit={{ opacity: 0, y: -8, transition: { duration: 0.18 } }}
+              className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
             >
-              {isUser ? <User className="h-4 w-4" /> : <Bot className="text-accent h-4 w-4" />}
-            </div>
-            <div
-              className={`max-w-3xl min-w-0 flex-1 rounded-xl px-5 py-4 text-sm leading-relaxed ${
-                isUser ? 'bg-accent text-accent-fg' : 'bg-surface-raised text-fg'
-              }`}
-            >
-              {isUser ? (
-                <p className="whitespace-pre-wrap">{message.content}</p>
-              ) : isStreamingPlaceholder ? (
-                <span className="text-fg-subtle inline-flex items-center gap-1.5 italic">
-                  Thinking
-                  <span className="flex gap-1">
-                    <span className="bg-fg-subtle h-1 w-1 animate-pulse rounded-full" />
-                    <span className="bg-fg-subtle h-1 w-1 animate-pulse rounded-full [animation-delay:150ms]" />
-                    <span className="bg-fg-subtle h-1 w-1 animate-pulse rounded-full [animation-delay:300ms]" />
+              <div
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                  isUser
+                    ? 'bg-accent text-accent-fg'
+                    : 'bg-surface-raised border-border-subtle border'
+                }`}
+              >
+                {isUser ? <User className="h-4 w-4" /> : <Bot className="text-accent h-4 w-4" />}
+              </div>
+              <div
+                className={`max-w-3xl min-w-0 flex-1 rounded-xl px-5 py-4 text-sm leading-relaxed ${
+                  isUser
+                    ? 'bg-accent text-accent-fg'
+                    : 'bg-surface-raised text-fg border-border-subtle border'
+                }`}
+              >
+                {isUser ? (
+                  <p className="whitespace-pre-wrap">{message.content}</p>
+                ) : isStreamingPlaceholder ? (
+                  <span className="text-fg-subtle inline-flex items-center gap-1.5 italic">
+                    Thinking
+                    <span className="flex gap-1">
+                      <span className="bg-fg-subtle h-1 w-1 animate-pulse rounded-full" />
+                      <span className="bg-fg-subtle h-1 w-1 animate-pulse rounded-full [animation-delay:150ms]" />
+                      <span className="bg-fg-subtle h-1 w-1 animate-pulse rounded-full [animation-delay:300ms]" />
+                    </span>
                   </span>
-                </span>
-              ) : (
-                <MarkdownContent content={message.content} />
-              )}
-            </div>
-          </li>
-        );
-      })}
+                ) : (
+                  <MarkdownContent content={message.content} />
+                )}
+              </div>
+            </motion.li>
+          );
+        })}
+      </AnimatePresence>
     </ol>
   );
 }

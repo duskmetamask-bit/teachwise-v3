@@ -2,6 +2,7 @@
 
 import type { PlannerBlock } from '@/lib/ai/prompts/planner';
 import { BlockCard } from '@/features/planner/block-card';
+import { StaggerContainer, StaggerItem } from '@/components/ui/motion';
 
 type BlocksListProps = {
   blocks: PlannerBlock[];
@@ -24,9 +25,9 @@ export function BlocksList({
 }: BlocksListProps) {
   if (blocks.length === 0) return null;
   return (
-    <ol className="flex flex-col gap-4">
+    <StaggerContainer delay={0.05} className="flex flex-col gap-4">
       {blocks.map((block, index) => (
-        <li key={block.id}>
+        <StaggerItem key={block.id}>
           <BlockCard
             block={block}
             index={index}
@@ -38,8 +39,8 @@ export function BlocksList({
             onDelete={() => onDeleteBlock(block.id)}
             onMove={(direction) => onMoveBlock(block.id, direction)}
           />
-        </li>
+        </StaggerItem>
       ))}
-    </ol>
+    </StaggerContainer>
   );
 }
