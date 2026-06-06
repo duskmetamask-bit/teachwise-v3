@@ -20,7 +20,13 @@ const PRESET_TOPICS: readonly string[] = [
 const DURATIONS = ['30 minutes', '45 minutes', '60 minutes', '90 minutes'] as const;
 
 export function PlannerForm({ initialTopic, initialDuration, isBusy, onSubmit }: PlannerFormProps) {
-  const [topic, setTopic] = useState(initialTopic);
+  const [topic, setTopic] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const urlTopic = new URLSearchParams(window.location.search).get('topic');
+      if (urlTopic) return urlTopic;
+    }
+    return initialTopic;
+  });
   const [duration, setDuration] = useState(initialDuration || '60 minutes');
 
   function handleSubmit(event: FormEvent<HTMLFormElement>): void {
