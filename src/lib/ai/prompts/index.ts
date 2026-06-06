@@ -12,7 +12,15 @@ export {
   type RubricLevel,
   type RubricCriterion,
 } from '@/lib/ai/prompts/rubric';
-export { automarkSystemPrompt } from '@/lib/ai/prompts/automark';
+export {
+  AutomarkResultSchema,
+  AutomarkCriterionResultSchema,
+  automarkSystemPrompt,
+  automarkUserPrompt,
+  parseAutomarkResponse,
+  type AutomarkResult,
+  type AutomarkCriterionResult,
+} from '@/lib/ai/prompts/automark';
 export {
   PLANNER_BLOCK_KINDS,
   PlannerBlockKindSchema,

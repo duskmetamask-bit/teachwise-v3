@@ -21,15 +21,27 @@
   --accent: #a78bfa;
   --accent-hover: #8b5cf6;
   --accent-fg: #0a0a0f;
+  --accent-soft: rgba(167, 139, 250, 0.12);
 
   --success: #34d399;
   --warning: #fbbf24;
   --danger: #f87171;
+  --danger-soft: rgba(248, 113, 113, 0.12);
 
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
   --radius-xl: 20px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 120ms;
+  --duration-base: 220ms;
+  --duration-slow: 360ms;
 }
 
 [data-theme='light'] {
@@ -46,6 +58,16 @@
   --accent: #7c3aed;
   --accent-hover: #6d28d9;
   --accent-fg: #ffffff;
+  --accent-soft: rgba(124, 58, 237, 0.1);
+
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --danger-soft: rgba(220, 38, 38, 0.08);
+
+  --shadow-sm: 0 1px 2px rgba(20, 20, 30, 0.05);
+  --shadow-md: 0 4px 12px rgba(20, 20, 30, 0.06);
+  --shadow-lg: 0 12px 32px rgba(20, 20, 30, 0.08);
 }
 
 @theme inline {
@@ -60,15 +82,20 @@
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
   --radius-xl: var(--radius-xl);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
 }
 
 html,
@@ -87,4 +114,20 @@ body {
 
 * {
   border-color: var(--border);
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--fg);
+}
+
+/* Reduce-motion respect */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

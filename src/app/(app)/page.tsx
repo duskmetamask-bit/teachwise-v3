@@ -51,8 +51,8 @@ const FEATURES: readonly Feature[] = [
     name: 'Automark',
     description: 'AI marking against a rubric. Stores feedback only, discards student work.',
     icon: FileCheck2,
-    status: 'phase-3',
-    href: null,
+    status: 'live',
+    href: '/automark',
   },
   {
     id: 'profile',
@@ -82,15 +82,14 @@ export default function Home() {
       <div className="mb-10">
         <div className="text-fg-muted mb-2 flex items-center gap-2 text-xs font-medium tracking-wide uppercase">
           <Sparkles className="text-accent h-3.5 w-3.5" />
-          Phase 3 · Chat + Planner + Units + Rubrics + Profile live
+          Phase 3 · All 6 features live
         </div>
         <h1 className="text-fg text-3xl font-semibold tracking-tight sm:text-4xl">TeachWise v3</h1>
         <p className="text-fg-muted mt-3 max-w-2xl text-sm leading-relaxed sm:text-base">
-          AI teacher workspace for Australian F-6 teachers. Six features, three modalities (text,
-          image, speech), one teaching-agent orchestrator. Chat, Planner, Units, Rubrics, and
-          Profile are live — the agent streams M3 responses with your profile context, drafts
-          block-based lessons, multi-week units, and criteria × levels rubrics, with on-demand
-          illustrations, and exports to docx.
+          AI teacher workspace for Australian F-6 teachers. All six features live — the agent
+          streams M3 responses with your profile context, drafts block-based lessons, multi-week
+          units, criteria × levels rubrics, and marks student work with privacy-preserved feedback.
+          On-demand illustrations, docx exports, local-only storage.
         </p>
       </div>
 
@@ -130,7 +129,7 @@ export default function Home() {
       <section className="border-border-subtle bg-surface-raised mt-10 rounded-xl border p-6">
         <h2 className="text-fg text-sm font-semibold tracking-wide uppercase">Next up</h2>
         <ul className="text-fg-muted mt-3 space-y-2 text-sm">
-          <li>· Phase 3: build automark.</li>
+          <li>· Phase 3 close-out: design polish pass on all surfaces.</li>
           <li>· Phase 4: add Clerk for per-teacher isolation, ship to the pilot.</li>
         </ul>
       </section>
