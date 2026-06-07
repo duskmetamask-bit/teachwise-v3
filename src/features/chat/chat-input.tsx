@@ -51,6 +51,7 @@ export function ChatInput({
         placeholder={placeholder}
         rows={1}
         disabled={isBusy}
+        aria-label="Message"
         className="text-fg placeholder:text-fg-subtle w-full resize-none bg-transparent px-3 py-2 text-sm leading-relaxed outline-none disabled:opacity-50"
       />
       <div className="mt-1 flex items-center justify-between px-1">

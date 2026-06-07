@@ -113,7 +113,10 @@ export default function ChatPage() {
           <Messages messages={messages} status={status} />
         )}
         {error && (
-          <div className="border-danger/30 bg-danger-soft text-danger mt-6 rounded-lg border px-4 py-3 text-sm">
+          <div
+            role="alert"
+            className="border-danger/30 bg-danger-soft text-danger mt-6 rounded-lg border px-4 py-3 text-sm"
+          >
             {error}
           </div>
         )}

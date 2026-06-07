@@ -18,7 +18,12 @@ export function Messages({ messages, status }: MessagesProps) {
   }
 
   return (
-    <ol className="flex flex-col gap-6">
+    <ul
+      role="log"
+      aria-label="Chat transcript"
+      aria-relevant="additions"
+      className="flex flex-col gap-6"
+    >
       <AnimatePresence initial={false}>
         {messages.map((message, index) => {
           const isUser = message.role === 'user';
@@ -71,7 +76,7 @@ export function Messages({ messages, status }: MessagesProps) {
           );
         })}
       </AnimatePresence>
-    </ol>
+    </ul>
   );
 }
 
