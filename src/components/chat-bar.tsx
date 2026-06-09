@@ -4,6 +4,8 @@ import { Bot, Plus, Send, Sparkles, Square, User } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useAgentChat } from '@/lib/use-agent-chat';
 
+const SEND_MESSAGE_EVENT = 'teachwise:send-message';
+
 export function ChatBar() {
   const { messages, status, error, sendMessage, stop, reset } = useAgentChat();
   const [draft, setDraft] = useState('');
@@ -14,6 +16,19 @@ export function ChatBar() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Listen for cross-component send requests (home page primary input
+  // + example prompts). Decoupled, no shared store required.
+  useEffect(() => {
+    function onSend(event: Event) {
+      const detail = (event as CustomEvent<{ text?: string }>).detail;
+      const text = detail?.text?.trim();
+      if (!text) return;
+      void sendMessage(text);
+    }
+    window.addEventListener(SEND_MESSAGE_EVENT, onSend);
+    return () => window.removeEventListener(SEND_MESSAGE_EVENT, onSend);
+  }, [sendMessage]);
 
   const isBusy = status === 'sending' || status === 'streaming';
   const isEmpty = messages.length === 0;

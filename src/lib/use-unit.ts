@@ -31,6 +31,7 @@ const UnitStateSchema = z.object({
   weeks: z.number().int().min(1).max(20).default(4),
   lessonsPerWeek: z.number().int().min(1).max(10).default(3),
   plan: PlanSchema.nullable().default(null),
+  updatedAt: z.number().int().positive().optional(),
 });
 export type UnitState = z.infer<typeof UnitStateSchema>;
 
@@ -85,7 +86,8 @@ function writeState(next: UnitState): void {
   if (!hasContent) {
     window.localStorage.removeItem(STORAGE_KEY);
   } else {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    const stamped = { ...next, updatedAt: Date.now() };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stamped));
   }
   window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEY }));
 }

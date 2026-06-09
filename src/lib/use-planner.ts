@@ -1,9 +1,14 @@
 'use client';
 
 import { useCallback, useSyncExternalStore } from 'react';
+import { z } from 'zod';
 import { PlannerStateSchema, type PlannerBlock, type PlannerState } from '@/lib/ai/prompts/planner';
 
 const STORAGE_KEY = 'teachwise:planner';
+
+const PlannerStateWithMetaSchema = PlannerStateSchema.extend({
+  updatedAt: z.number().int().positive().optional(),
+});
 
 const EMPTY_STATE: PlannerState = Object.freeze({
   topic: '',
@@ -25,7 +30,7 @@ function readSnapshot(): PlannerState {
   }
   try {
     const parsed: unknown = JSON.parse(raw);
-    const result = PlannerStateSchema.safeParse(parsed);
+    const result = PlannerStateWithMetaSchema.safeParse(parsed);
     cachedSnapshot = result.success
       ? (Object.freeze({
           ...result.data,
@@ -50,7 +55,8 @@ function writeState(next: PlannerState): void {
   if (!hasContent) {
     window.localStorage.removeItem(STORAGE_KEY);
   } else {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    const stamped = { ...next, updatedAt: Date.now() };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stamped));
   }
   window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEY }));
 }

@@ -20,6 +20,7 @@ const RubricStateSchema = z.object({
   topic: z.string().default(''),
   levelCount: z.number().int().min(2).max(6).default(4),
   rubric: PersistedRubricSchema.nullable().default(null),
+  updatedAt: z.number().int().positive().optional(),
 });
 export type RubricState = z.infer<typeof RubricStateSchema>;
 
@@ -81,7 +82,8 @@ function writeState(next: RubricState): void {
   if (!hasContent) {
     window.localStorage.removeItem(STORAGE_KEY);
   } else {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    const stamped = { ...next, updatedAt: Date.now() };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stamped));
   }
   window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEY }));
 }
