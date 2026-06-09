@@ -1,5 +1,6 @@
 'use client';
 
+import { PaletteTrigger } from '@/components/palette-trigger';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 export function TopBar() {
@@ -15,6 +16,7 @@ export function TopBar() {
         </span>
       </div>
       <div className="flex items-center gap-2">
+        <PaletteTrigger />
         <ThemeToggle />
       </div>
     </header>

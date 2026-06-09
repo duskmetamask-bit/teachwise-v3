@@ -1,7 +1,16 @@
 'use client';
 
 import { motion, type HTMLMotionProps } from 'framer-motion';
-import { fadeIn, fadeInDown, fadeInUp, pulse, scaleIn, staggerParent } from '@/lib/motion';
+import {
+  DURATION,
+  EASE_OUT,
+  fadeIn,
+  fadeInDown,
+  fadeInUp,
+  pulse,
+  scaleIn,
+  staggerParent,
+} from '@/lib/motion';
 
 type DivMotionProps = HTMLMotionProps<'div'>;
 
@@ -15,7 +24,7 @@ export function FadeIn({ delay = 0, children, ...rest }: FadeInProps) {
       initial="hidden"
       animate="visible"
       variants={fadeIn}
-      transition={{ delay, duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ delay, duration: DURATION.base, ease: EASE_OUT }}
       {...rest}
     >
       {children}
@@ -29,7 +38,7 @@ export function FadeInUp({ delay = 0, children, ...rest }: FadeInProps) {
       initial="hidden"
       animate="visible"
       variants={fadeInUp}
-      transition={{ delay, duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ delay, duration: DURATION.base, ease: EASE_OUT }}
       {...rest}
     >
       {children}
@@ -43,7 +52,7 @@ export function FadeInDown({ delay = 0, children, ...rest }: FadeInProps) {
       initial="hidden"
       animate="visible"
       variants={fadeInDown}
-      transition={{ delay, duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ delay, duration: DURATION.base, ease: EASE_OUT }}
       {...rest}
     >
       {children}
@@ -57,7 +66,7 @@ export function ScaleIn({ delay = 0, children, ...rest }: FadeInProps) {
       initial="hidden"
       animate="visible"
       variants={scaleIn}
-      transition={{ delay, duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ delay, duration: DURATION.base, ease: EASE_OUT }}
       {...rest}
     >
       {children}

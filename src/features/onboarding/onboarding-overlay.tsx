@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { useHotkeys } from '@/lib/use-hotkeys';
+import { useScope } from '@/lib/hotkey-scopes';
 import { useOnboarding } from '@/lib/use-onboarding';
 
 const SAMPLE_TOPIC = 'Fractions: equivalent fractions on a number line';
@@ -62,23 +64,10 @@ export function OnboardingOverlay() {
     router.push(`/planner?topic=${encodeURIComponent(SAMPLE_TOPIC)}`);
   }, [dismiss, router]);
 
-  useEffect(() => {
-    if (dismissed) return;
-    function onKey(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        handleDismiss();
-      } else if (event.key === 'ArrowRight') {
-        event.preventDefault();
-        goNext();
-      } else if (event.key === 'ArrowLeft') {
-        event.preventDefault();
-        goPrev();
-      }
-    }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [dismissed, goNext, goPrev, handleDismiss]);
+  useScope('onboarding');
+  useHotkeys('escape', handleDismiss, { scope: 'onboarding' });
+  useHotkeys('arrowright', goNext, { scope: 'onboarding' });
+  useHotkeys('arrowleft', goPrev, { scope: 'onboarding' });
 
   useEffect(() => {
     if (dismissed) return;

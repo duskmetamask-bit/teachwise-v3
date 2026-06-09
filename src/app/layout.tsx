@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { HotkeysRoot } from '@/components/hotkeys-root';
 import { ThemeProvider } from '@/components/theme-provider';
+import { HotkeyScopeProvider } from '@/lib/hotkey-scopes';
 import './globals.css';
 
 const geistSans = Geist({
@@ -47,7 +49,11 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="bg-bg text-fg min-h-full">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <HotkeyScopeProvider>
+            <HotkeysRoot>{children}</HotkeysRoot>
+          </HotkeyScopeProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
