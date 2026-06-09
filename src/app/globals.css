@@ -3,7 +3,7 @@
 /* ─── Theme tokens ────────────────────────────────────────────────────────
    Dark default, light override. ThemeProvider toggles `data-theme` on <html>.
    Tokens are exposed to Tailwind via @theme inline so you can write
-   `bg-surface`, `text-fg-muted`, `border-border-subtle`, etc. in markup.
+   `bg-surface`, `text-fg-muted`, `border-border-subtle`, `text-h1`, etc.
 */
 
 :root,
@@ -11,8 +11,11 @@
   --background: #0a0a0f;
   --surface: #13131a;
   --surface-raised: #1c1c26;
+  --surface-overlay: #23232f;
+  --surface-sunken: #0e0e14;
   --border: #2a2a36;
   --border-subtle: #1f1f29;
+  --border-strong: #3a3a48;
 
   --fg: #ededf2;
   --fg-muted: #9a9aae;
@@ -38,20 +41,56 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --shadow-overlay: 0 24px 64px rgba(0, 0, 0, 0.55);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --duration-fast: 120ms;
   --duration-base: 220ms;
   --duration-slow: 360ms;
+
+  /* Typography — major-third scale, 16px base, optical restraint.
+     See: pbakaus/typeset principles (line-height rhythm, weight restraint,
+     letter-spacing tightening at large sizes). */
+  --font-size-display: 3rem;
+  --line-height-display: 1.1;
+  --letter-spacing-display: -0.02em;
+
+  --font-size-h1: 2.25rem;
+  --line-height-heading: 1.2;
+  --letter-spacing-heading: -0.015em;
+
+  --font-size-h2: 1.875rem;
+  --font-size-h3: 1.5rem;
+  --font-size-h4: 1.25rem;
+
+  --font-size-body-lg: 1.125rem;
+  --font-size-body: 1rem;
+  --font-size-body-sm: 0.875rem;
+  --font-size-caption: 0.75rem;
+  --font-size-micro: 0.6875rem;
+
+  --line-height-body: 1.6;
+  --line-height-tight: 1.4;
+
+  --letter-spacing-caps: 0.04em;
+  --letter-spacing-wide: 0.02em;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
 }
 
 [data-theme='light'] {
   --background: #fafafa;
   --surface: #ffffff;
   --surface-raised: #ffffff;
+  --surface-overlay: #ffffff;
+  --surface-sunken: #f4f4f8;
   --border: #e5e5ec;
   --border-subtle: #f0f0f5;
+  --border-strong: #c8c8d4;
 
   --fg: #1a1a24;
   --fg-muted: #5c5c6e;
@@ -72,14 +111,18 @@
   --shadow-sm: 0 1px 2px rgba(20, 20, 30, 0.05);
   --shadow-md: 0 4px 12px rgba(20, 20, 30, 0.06);
   --shadow-lg: 0 12px 32px rgba(20, 20, 30, 0.08);
+  --shadow-overlay: 0 24px 64px rgba(20, 20, 30, 0.12);
 }
 
 @theme inline {
   --color-bg: var(--background);
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
+  --color-surface-overlay: var(--surface-overlay);
+  --color-surface-sunken: var(--surface-sunken);
   --color-border: var(--border);
   --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
   --color-fg: var(--fg);
   --color-fg-muted: var(--fg-muted);
   --color-fg-subtle: var(--fg-subtle);
@@ -102,11 +145,58 @@
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
+  --shadow-overlay: var(--shadow-overlay);
   --ease-out: var(--ease-out);
   --ease-in-out: var(--ease-in-out);
   --duration-fast: var(--duration-fast);
   --duration-base: var(--duration-base);
   --duration-slow: var(--duration-slow);
+
+  /* Typography utilities — `text-h1`, `text-body`, `text-caption`, etc.
+     Tailwind v4 picks up `--text-X` as font-size, with `--text-X--line-height`
+     and `--text-X--letter-spacing` as line-height + letter-spacing, and
+     `--text-X--font-weight` as font-weight. */
+  --text-display: var(--font-size-display);
+  --text-display--line-height: var(--line-height-display);
+  --text-display--letter-spacing: var(--letter-spacing-display);
+  --text-display--font-weight: var(--font-weight-bold);
+
+  --text-h1: var(--font-size-h1);
+  --text-h1--line-height: var(--line-height-heading);
+  --text-h1--letter-spacing: var(--letter-spacing-heading);
+  --text-h1--font-weight: var(--font-weight-semibold);
+
+  --text-h2: var(--font-size-h2);
+  --text-h2--line-height: var(--line-height-heading);
+  --text-h2--letter-spacing: var(--letter-spacing-heading);
+  --text-h2--font-weight: var(--font-weight-semibold);
+
+  --text-h3: var(--font-size-h3);
+  --text-h3--line-height: var(--line-height-heading);
+  --text-h3--font-weight: var(--font-weight-semibold);
+
+  --text-h4: var(--font-size-h4);
+  --text-h4--line-height: var(--line-height-tight);
+  --text-h4--font-weight: var(--font-weight-medium);
+
+  --text-body-lg: var(--font-size-body-lg);
+  --text-body-lg--line-height: var(--line-height-body);
+
+  --text-body: var(--font-size-body);
+  --text-body--line-height: var(--line-height-body);
+
+  --text-body-sm: var(--font-size-body-sm);
+  --text-body-sm--line-height: var(--line-height-body);
+
+  --text-caption: var(--font-size-caption);
+  --text-caption--line-height: var(--line-height-tight);
+  --text-caption--letter-spacing: var(--letter-spacing-wide);
+  --text-caption--font-weight: var(--font-weight-medium);
+
+  --text-micro: var(--font-size-micro);
+  --text-micro--line-height: var(--line-height-tight);
+  --text-micro--letter-spacing: var(--letter-spacing-caps);
+  --text-micro--font-weight: var(--font-weight-medium);
 }
 
 html,
@@ -142,6 +232,28 @@ button:focus-visible,
 a:focus-visible,
 [role='button']:focus-visible {
   outline-offset: 3px;
+}
+
+/* Skeleton shimmer — uses the shared accent at low opacity. */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-sunken) 0%,
+    var(--surface-raised) 50%,
+    var(--surface-sunken) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s linear infinite;
+  border-radius: var(--radius-sm);
 }
 
 /* Reduce-motion respect */
