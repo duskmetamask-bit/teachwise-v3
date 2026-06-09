@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { ChatInput, Messages, QuickActions, exportConversationAsDocx } from '@/features/chat';
 import { useAgentChat } from '@/lib/use-agent-chat';
 import { useProfile } from '@/lib/use-profile';
-import { FadeIn, FadeInUp, StaggerContainer } from '@/components/ui/motion';
+import { FadeIn, FadeInDown, FadeInUp, StaggerContainer } from '@/components/ui/motion';
 
 export default function ChatPage() {
   const { profile } = useProfile();
@@ -36,57 +36,59 @@ export default function ChatPage() {
 
   return (
     <div className="bg-bg flex h-full flex-col">
-      <div className="border-border-subtle bg-surface/80 supports-[backdrop-filter]:bg-surface/60 border-b backdrop-blur">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="text-fg-muted hover:text-fg flex items-center gap-1.5 text-sm"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Home
-            </Link>
-            <div className="bg-border-subtle h-4 w-px" />
-            <div className="flex items-center gap-2">
-              <Sparkles className="text-accent h-4 w-4" />
-              <span className="text-fg text-sm font-semibold">Chat</span>
+      <FadeInDown>
+        <div className="border-border-subtle bg-surface/80 supports-[backdrop-filter]:bg-surface/60 sticky top-0 z-10 border-b backdrop-blur">
+          <div className="mx-auto flex max-w-3xl items-center justify-between gap-2 px-4 py-2.5 sm:px-6">
+            <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+              <Link
+                href="/"
+                className="text-fg-muted hover:text-fg text-caption flex shrink-0 items-center gap-1.5 transition-colors"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Home</span>
+              </Link>
+              <div className="bg-border-subtle h-4 w-px shrink-0" />
+              <div className="bg-accent-soft text-accent text-caption flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 font-medium">
+                <Sparkles className="h-3 w-3" />
+                Chat
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/profile"
-              className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium"
-              aria-label="Edit profile"
-            >
-              <Settings className="h-3 w-3" />
-              Profile
-            </Link>
-            {messages.length > 0 && (
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+              <Link
+                href="/profile"
+                className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg text-caption flex items-center gap-1.5 rounded-md border px-2 py-1.5 font-medium transition-colors"
+                aria-label="Edit profile"
+              >
+                <Settings className="h-3 w-3" />
+                <span className="hidden sm:inline">Profile</span>
+              </Link>
+              {messages.length > 0 && (
+                <button
+                  type="button"
+                  onClick={reset}
+                  className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg text-caption flex items-center gap-1.5 rounded-md border px-2 py-1.5 font-medium transition-colors"
+                  aria-label="New conversation"
+                >
+                  <Trash2 className="h-3 w-3" />
+                  <span className="hidden sm:inline">Clear</span>
+                </button>
+              )}
               <button
                 type="button"
-                onClick={reset}
-                className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium"
-                aria-label="New conversation"
+                onClick={handleExport}
+                disabled={messages.length === 0}
+                className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg text-caption flex items-center gap-1.5 rounded-md border px-2 py-1.5 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Export conversation as docx"
               >
-                <Trash2 className="h-3 w-3" />
-                Clear
+                <Download className="h-3 w-3" />
+                <span className="hidden sm:inline">Export</span>
               </button>
-            )}
-            <button
-              type="button"
-              onClick={handleExport}
-              disabled={messages.length === 0}
-              className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label="Export conversation as docx"
-            >
-              <Download className="h-3 w-3" />
-              Export
-            </button>
+            </div>
           </div>
         </div>
-      </div>
+      </FadeInDown>
 
-      <div className="mx-auto w-full max-w-4xl flex-1 overflow-y-auto px-6 py-8">
+      <div className="mx-auto w-full max-w-3xl flex-1 overflow-y-auto px-4 py-8 sm:px-6">
         {isEmpty ? (
           <FadeIn className="flex flex-col gap-8">
             <FadeInUp>
@@ -95,10 +97,8 @@ export default function ChatPage() {
                   <Sparkles className="h-7 w-7" />
                 </div>
                 <div>
-                  <h1 className="text-fg text-3xl font-semibold tracking-tight sm:text-4xl">
-                    What can I help with?
-                  </h1>
-                  <p className="text-fg-muted mt-2 max-w-md text-sm leading-relaxed">
+                  <h1 className="text-h1 text-fg">What can I help with?</h1>
+                  <p className="text-body-lg text-fg-muted mt-2 max-w-md">
                     Pick a quick action, or describe what you need. I&apos;ll draft lesson plans,
                     rubrics, report comments, parent emails, sub plans, and more.
                   </p>
@@ -115,7 +115,7 @@ export default function ChatPage() {
         {error && (
           <div
             role="alert"
-            className="border-danger/30 bg-danger-soft text-danger mt-6 rounded-lg border px-4 py-3 text-sm"
+            className="border-danger/30 bg-danger-soft text-danger text-caption mt-6 rounded-lg border px-4 py-3"
           >
             {error}
           </div>
@@ -123,7 +123,7 @@ export default function ChatPage() {
       </div>
 
       <div className="border-border-subtle bg-surface/80 supports-[backdrop-filter]:bg-surface/60 border-t backdrop-blur">
-        <div className="mx-auto max-w-4xl px-6 py-4">
+        <div className="mx-auto max-w-3xl px-4 py-3 sm:px-6 sm:py-4">
           <ChatInput
             value={draft}
             onChange={setDraft}
