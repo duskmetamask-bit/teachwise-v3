@@ -2,8 +2,14 @@
 
 import { ArrowLeft, ClipboardList, Download, Loader2, Settings, Trash2 } from 'lucide-react';
 import Link from 'next/link';
-import { useCallback, useState } from 'react';
-import { RubricForm, RubricHeader, RubricTable, exportRubricAsDocx } from '@/features/rubric';
+import { useCallback, useRef, useState } from 'react';
+import {
+  ErrorChip,
+  RubricForm,
+  RubricHeader,
+  RubricTable,
+  exportRubricAsDocx,
+} from '@/features/rubric';
 import type { Rubric, RubricCriterion } from '@/lib/ai/prompts/rubric';
 import { useProfile } from '@/lib/use-profile';
 import { useRubric } from '@/lib/use-rubric';
@@ -32,12 +38,14 @@ export default function RubricPage() {
   const [error, setError] = useState<string | null>(null);
   const [busyCriterionId, setBusyCriterionId] = useState<string | null>(null);
   const [busyKind, setBusyKind] = useState<BusyKind | null>(null);
+  const lastSubmitRef = useRef<{ topic: string; levelCount: number } | null>(null);
 
   const handleGenerate = useCallback(
     async (topic: string, levelCount: number) => {
       setStatus('generating');
       setError(null);
       setMeta({ topic, levelCount });
+      lastSubmitRef.current = { topic, levelCount };
       try {
         const { rubric } = await postJson<{ rubric: Rubric }>('/api/agent/rubric', {
           action: 'generate',
@@ -54,6 +62,17 @@ export default function RubricPage() {
     },
     [profile, setMeta, setRubric],
   );
+
+  const handleRetry = useCallback(() => {
+    const last = lastSubmitRef.current;
+    if (!last) return;
+    void handleGenerate(last.topic, last.levelCount);
+  }, [handleGenerate]);
+
+  const handleDismissError = useCallback(() => {
+    setError(null);
+    setStatus('idle');
+  }, []);
 
   const handleRegenerateCriterion = useCallback(
     async (criterion: RubricCriterion) => {
@@ -185,9 +204,12 @@ export default function RubricPage() {
         )}
 
         {error && status === 'error' && (
-          <FadeIn className="border-danger/30 bg-danger-soft text-danger mt-6 rounded-lg border px-4 py-3 text-sm">
-            {error}
-          </FadeIn>
+          <ErrorChip
+            message={error}
+            disabled={isBusy}
+            onRetry={handleRetry}
+            onDismiss={handleDismissError}
+          />
         )}
 
         {hasRubric && state.rubric && (
