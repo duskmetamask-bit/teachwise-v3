@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { ChatInput, Messages, QuickActions, exportConversationAsDocx } from '@/features/chat';
 import { useAgentChat } from '@/lib/use-agent-chat';
 import { useProfile } from '@/lib/use-profile';
-import { FadeIn, FadeInDown, FadeInUp, StaggerContainer } from '@/components/ui/motion';
+import { FadeIn, FadeInDown, FadeInUp } from '@/components/ui/motion';
 
 export default function ChatPage() {
   const { profile } = useProfile();
@@ -97,7 +97,10 @@ export default function ChatPage() {
                   <Sparkles className="h-7 w-7" />
                 </div>
                 <div>
-                  <h1 className="text-h1 text-fg">What can I help with?</h1>
+                  <h1 className="text-h1 text-fg">
+                    What can I help with
+                    {profile.name ? <span className="text-fg-muted">, {profile.name}</span> : null}?
+                  </h1>
                   <p className="text-body-lg text-fg-muted mt-2 max-w-md">
                     Pick a quick action, or describe what you need. I&apos;ll draft lesson plans,
                     rubrics, report comments, parent emails, sub plans, and more.
@@ -105,9 +108,7 @@ export default function ChatPage() {
                 </div>
               </div>
             </FadeInUp>
-            <StaggerContainer delay={0.06}>
-              <QuickActions onSelect={handleQuickAction} disabled={isBusy} />
-            </StaggerContainer>
+            <QuickActions onSelect={handleQuickAction} disabled={isBusy} profile={profile} />
           </FadeIn>
         ) : (
           <Messages messages={messages} status={status} />
