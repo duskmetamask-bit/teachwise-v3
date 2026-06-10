@@ -7,7 +7,7 @@ import { BlocksList, PlannerForm, exportPlannerAsDocx } from '@/features/planner
 import type { PlannerBlock } from '@/lib/ai/prompts/planner';
 import { useProfile } from '@/lib/use-profile';
 import { usePlanner } from '@/lib/use-planner';
-import { FadeIn, FadeInUp, Pulse } from '@/components/ui/motion';
+import { FadeIn, FadeInDown, FadeInUp, Pulse } from '@/components/ui/motion';
 
 type Status = 'idle' | 'generating' | 'error';
 
@@ -96,116 +96,127 @@ export default function PlannerPage() {
   const isBusy = status === 'generating';
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-8 sm:px-10">
-      <FadeInUp>
-        <div className="mb-6 flex items-start justify-between gap-3">
-          <div>
-            <Link
-              href="/"
-              className="text-fg-muted hover:text-fg mb-3 inline-flex items-center gap-1.5 text-sm"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Home
-            </Link>
-            <div className="flex items-center gap-3">
-              <div className="bg-accent-soft text-accent flex h-10 w-10 items-center justify-center rounded-md">
-                <Calendar className="h-5 w-5" />
-              </div>
-              <div>
-                <h1 className="text-fg text-3xl font-semibold tracking-tight sm:text-4xl">
-                  Lesson planner
-                </h1>
-                <p className="text-fg-muted mt-1 text-sm">
-                  Block-based lessons. Regenerate any block, add an illustration on demand, export
-                  to docx.
-                </p>
+    <div className="bg-bg flex h-full flex-col">
+      <FadeInDown>
+        <div className="border-border-subtle bg-surface/80 supports-[backdrop-filter]:bg-surface/60 sticky top-0 z-10 border-b backdrop-blur">
+          <div className="mx-auto flex max-w-4xl items-center justify-between gap-2 px-4 py-2.5 sm:px-6">
+            <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+              <Link
+                href="/"
+                className="text-fg-muted hover:text-fg text-caption flex shrink-0 items-center gap-1.5 transition-colors"
+                aria-label="Back to home"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Home</span>
+              </Link>
+              <div className="bg-border-subtle h-4 w-px shrink-0" />
+              <div className="bg-accent-soft text-accent text-caption flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 font-medium">
+                <Calendar className="h-3 w-3" />
+                Lesson planner
               </div>
             </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <Link
-              href="/profile"
-              className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium"
-            >
-              <Settings className="h-3 w-3" />
-              Profile
-            </Link>
-            {hasBlocks && (
-              <>
-                <button
-                  type="button"
-                  onClick={clear}
-                  className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium"
-                >
-                  <Trash2 className="h-3 w-3" />
-                  Clear
-                </button>
-                <button
-                  type="button"
-                  onClick={handleExport}
-                  className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium"
-                >
-                  <Download className="h-3 w-3" />
-                  Export
-                </button>
-              </>
-            )}
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+              <Link
+                href="/profile"
+                className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg text-caption flex items-center gap-1.5 rounded-md border px-2 py-1.5 font-medium transition-colors"
+                aria-label="Edit profile"
+              >
+                <Settings className="h-3 w-3" />
+                <span className="hidden sm:inline">Profile</span>
+              </Link>
+              {hasBlocks && (
+                <>
+                  <button
+                    type="button"
+                    onClick={clear}
+                    className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg text-caption flex items-center gap-1.5 rounded-md border px-2 py-1.5 font-medium transition-colors"
+                    aria-label="Clear all blocks"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    <span className="hidden sm:inline">Clear</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExport}
+                    className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg text-caption flex items-center gap-1.5 rounded-md border px-2 py-1.5 font-medium transition-colors"
+                    aria-label="Export plan as docx"
+                  >
+                    <Download className="h-3 w-3" />
+                    <span className="hidden sm:inline">Export</span>
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </FadeInUp>
+      </FadeInDown>
 
-      <FadeIn delay={0.05}>
-        <PlannerForm
-          initialTopic={state.topic}
-          initialDuration={state.duration}
-          isBusy={isBusy}
-          onSubmit={handleGenerate}
-        />
-      </FadeIn>
-
-      {status === 'generating' && (
-        <FadeIn className="text-fg-muted mt-6 flex items-center gap-2 text-sm">
-          <Pulse>
-            <Loader2 className="text-accent h-4 w-4" />
-          </Pulse>
-          Drafting the lesson plan…
-        </FadeIn>
-      )}
-
-      {error && status === 'error' && (
-        <FadeIn className="border-danger/30 bg-danger-soft text-danger mt-6 rounded-lg border px-4 py-3 text-sm">
-          {error}
-        </FadeIn>
-      )}
-
-      {hasBlocks && (
-        <FadeInUp delay={0.1} className="mt-8">
-          <div className="text-fg-muted mb-3 flex items-center justify-between text-xs">
-            <span>
-              {state.blocks.length} {state.blocks.length === 1 ? 'block' : 'blocks'} ·{' '}
-              {state.duration || 'duration not set'}
-            </span>
-            {state.generatedAt && (
-              <span>Generated {new Date(state.generatedAt).toLocaleString()}</span>
-            )}
+      <div className="mx-auto w-full max-w-4xl flex-1 overflow-y-auto px-4 py-8 sm:px-10">
+        <FadeInUp>
+          <div className="mb-6">
+            <h1 className="text-fg text-2xl font-semibold tracking-tight sm:text-3xl">
+              Lesson planner
+            </h1>
+            <p className="text-fg-muted mt-1 text-sm">
+              Block-based lessons. Regenerate any block, add an illustration on demand, export to
+              docx.
+            </p>
           </div>
-          <BlocksList
-            blocks={state.blocks}
-            topic={state.topic}
-            onRegenerateBlock={handleRegenerateBlock}
-            onGenerateImage={handleGenerateImage}
-            onEditBlock={handleEditBlock}
-            onDeleteBlock={removeBlock}
-            onMoveBlock={moveBlock}
-          />
         </FadeInUp>
-      )}
 
-      {!hasBlocks && status === 'idle' && (
-        <FadeIn delay={0.2} className="text-fg-muted mt-6 text-xs">
-          Stored locally in this browser. Multi-teacher isolation arrives in Phase 4 with Clerk.
+        <FadeIn delay={0.05}>
+          <PlannerForm
+            initialTopic={state.topic}
+            initialDuration={state.duration}
+            isBusy={isBusy}
+            onSubmit={handleGenerate}
+          />
         </FadeIn>
-      )}
+
+        {status === 'generating' && (
+          <FadeIn className="text-fg-muted mt-6 flex items-center gap-2 text-sm">
+            <Pulse>
+              <Loader2 className="text-accent h-4 w-4" />
+            </Pulse>
+            Drafting the lesson plan…
+          </FadeIn>
+        )}
+
+        {error && status === 'error' && (
+          <FadeIn className="border-danger/30 bg-danger-soft text-danger mt-6 rounded-lg border px-4 py-3 text-sm">
+            {error}
+          </FadeIn>
+        )}
+
+        {hasBlocks && (
+          <FadeInUp delay={0.1} className="mt-8">
+            <div className="text-fg-muted mb-3 flex items-center justify-between text-xs">
+              <span>
+                {state.blocks.length} {state.blocks.length === 1 ? 'block' : 'blocks'} ·{' '}
+                {state.duration || 'duration not set'}
+              </span>
+              {state.generatedAt && (
+                <span>Generated {new Date(state.generatedAt).toLocaleString()}</span>
+              )}
+            </div>
+            <BlocksList
+              blocks={state.blocks}
+              topic={state.topic}
+              onRegenerateBlock={handleRegenerateBlock}
+              onGenerateImage={handleGenerateImage}
+              onEditBlock={handleEditBlock}
+              onDeleteBlock={removeBlock}
+              onMoveBlock={moveBlock}
+            />
+          </FadeInUp>
+        )}
+
+        {!hasBlocks && status === 'idle' && (
+          <FadeIn delay={0.2} className="text-fg-muted mt-6 text-xs">
+            Stored locally in this browser. Multi-teacher isolation arrives in Phase 4 with Clerk.
+          </FadeIn>
+        )}
+      </div>
     </div>
   );
 }
