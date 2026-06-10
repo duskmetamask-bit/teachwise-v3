@@ -2,8 +2,8 @@
 
 import { ArrowLeft, Calendar, Download, Loader2, Settings, Trash2 } from 'lucide-react';
 import Link from 'next/link';
-import { useCallback, useState } from 'react';
-import { BlocksList, PlannerForm, exportPlannerAsDocx } from '@/features/planner';
+import { useCallback, useRef, useState } from 'react';
+import { BlocksList, ErrorChip, PlannerForm, exportPlannerAsDocx } from '@/features/planner';
 import type { PlannerBlock } from '@/lib/ai/prompts/planner';
 import { useProfile } from '@/lib/use-profile';
 import { usePlanner } from '@/lib/use-planner';
@@ -29,12 +29,14 @@ export default function PlannerPage() {
   const { state, setMeta, setBlocks, replaceBlock, removeBlock, moveBlock, clear } = usePlanner();
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState<string | null>(null);
+  const lastSubmitRef = useRef<{ topic: string; duration: string } | null>(null);
 
   const handleGenerate = useCallback(
     async (topic: string, duration: string) => {
       setStatus('generating');
       setError(null);
       setMeta({ topic, duration });
+      lastSubmitRef.current = { topic, duration };
       try {
         const { blocks } = await postJson<{ blocks: PlannerBlock[] }>('/api/agent/plan', {
           action: 'generate',
@@ -51,6 +53,17 @@ export default function PlannerPage() {
     },
     [profile, setBlocks, setMeta],
   );
+
+  const handleRetry = useCallback(() => {
+    const last = lastSubmitRef.current;
+    if (!last) return;
+    void handleGenerate(last.topic, last.duration);
+  }, [handleGenerate]);
+
+  const handleDismissError = useCallback(() => {
+    setError(null);
+    setStatus('idle');
+  }, []);
 
   const handleRegenerateBlock = useCallback(
     async (block: PlannerBlock) => {
@@ -183,9 +196,12 @@ export default function PlannerPage() {
         )}
 
         {error && status === 'error' && (
-          <FadeIn className="border-danger/30 bg-danger-soft text-danger mt-6 rounded-lg border px-4 py-3 text-sm">
-            {error}
-          </FadeIn>
+          <ErrorChip
+            message={error}
+            disabled={isBusy}
+            onRetry={handleRetry}
+            onDismiss={handleDismissError}
+          />
         )}
 
         {hasBlocks && (
