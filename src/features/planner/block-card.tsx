@@ -98,18 +98,22 @@ export function BlockCard({
     }
   }
 
+  const canMoveUp = index > 0 && !busy && !isEditing;
+  const canMoveDown = index < total - 1 && !busy && !isEditing;
+
   return (
-    <article className="border-border-subtle bg-surface-raised rounded-xl border">
+    <article className="border-border-subtle bg-surface-raised hover:border-border rounded-xl border transition-colors">
       <header className="border-border-subtle flex items-start justify-between gap-3 border-b px-5 py-3">
         <div className="flex min-w-0 items-start gap-3">
-          <div className="bg-surface flex h-9 w-9 shrink-0 items-center justify-center rounded-md">
-            <Icon className="text-fg h-4.5 w-4.5" />
+          <div className="bg-accent-soft text-accent flex h-9 w-9 shrink-0 items-center justify-center rounded-md">
+            <Icon className="h-4.5 w-4.5" />
           </div>
-          <div className="min-w-0">
-            <div className="text-fg-muted mb-0.5 flex items-center gap-2 text-[11px] font-medium tracking-wide uppercase">
-              <span>{meta.label}</span>
-              <span className="bg-border-subtle h-3 w-px" />
-              <span>
+          <div className="min-w-0 flex-1">
+            <div className="mb-1 flex items-center gap-2">
+              <span className="bg-surface text-fg-muted border-border-subtle rounded-full border px-2 py-0.5 text-[11px] font-medium whitespace-nowrap">
+                {meta.label}
+              </span>
+              <span className="text-fg-subtle hidden text-[11px] sm:inline">
                 Block {index + 1} of {total}
               </span>
             </div>
@@ -117,58 +121,89 @@ export function BlockCard({
               <input
                 value={draftHeading}
                 onChange={(event) => setDraftHeading(event.target.value)}
-                className="border-border-subtle bg-surface text-fg focus:border-accent w-full rounded-md border px-2.5 py-1.5 text-sm font-semibold outline-none"
+                className="border-border bg-surface text-fg focus:border-accent w-full rounded-md border px-2.5 py-1.5 text-sm font-semibold outline-none"
                 placeholder="Block heading"
               />
             ) : (
-              <h3 className="text-fg truncate text-base font-semibold">{block.heading}</h3>
+              <h3 className="text-fg text-base leading-snug font-semibold">{block.heading}</h3>
             )}
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-1">
-          <IconButton
-            label="Move up"
-            disabled={index === 0 || !!busy || isEditing}
-            onClick={() => onMove('up')}
-          >
-            <ArrowUp className="h-3.5 w-3.5" />
-          </IconButton>
-          <IconButton
-            label="Move down"
-            disabled={index === total - 1 || !!busy || isEditing}
-            onClick={() => onMove('down')}
-          >
-            <ArrowDown className="h-3.5 w-3.5" />
-          </IconButton>
-          {isEditing ? (
-            <>
-              <IconButton label="Cancel edit" onClick={cancelEdit}>
-                <X className="h-3.5 w-3.5" />
-              </IconButton>
-              <IconButton
-                label="Save edit"
-                onClick={saveEdit}
-                disabled={!draftHeading.trim() || !draftBody.trim()}
-              >
-                <Check className="h-3.5 w-3.5" />
-              </IconButton>
-            </>
-          ) : (
-            <>
-              <IconButton label="Edit block" onClick={startEdit} disabled={!!busy}>
-                <Pencil className="h-3.5 w-3.5" />
-              </IconButton>
-              <IconButton label="Regenerate text" onClick={handleRegenerate} disabled={!!busy}>
-                {busy === 'regenerate' ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <RotateCcw className="h-3.5 w-3.5" />
-                )}
-              </IconButton>
-              <IconButton label="Delete block" onClick={onDelete} disabled={!!busy} tone="danger">
-                <Trash2 className="h-3.5 w-3.5" />
-              </IconButton>
-            </>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <div className="border-border-subtle bg-surface flex items-center rounded-md border">
+            <IconButton
+              label="Move up"
+              disabled={!canMoveUp}
+              onClick={() => onMove('up')}
+              className="border-0"
+            >
+              <ArrowUp className="h-3.5 w-3.5" />
+            </IconButton>
+            <div className="bg-border-subtle h-4 w-px" />
+            <IconButton
+              label="Move down"
+              disabled={!canMoveDown}
+              onClick={() => onMove('down')}
+              className="border-0"
+            >
+              <ArrowDown className="h-3.5 w-3.5" />
+            </IconButton>
+          </div>
+          <div className="flex items-center gap-1">
+            {isEditing ? (
+              <>
+                <IconButton
+                  label="Cancel edit"
+                  onClick={cancelEdit}
+                  className="border-border-subtle"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </IconButton>
+                <IconButton
+                  label="Save edit"
+                  onClick={saveEdit}
+                  disabled={!draftHeading.trim() || !draftBody.trim()}
+                  tone="primary"
+                  className="border-border-subtle"
+                >
+                  <Check className="h-3.5 w-3.5" />
+                </IconButton>
+              </>
+            ) : (
+              <>
+                <IconButton
+                  label="Edit block"
+                  onClick={startEdit}
+                  disabled={!!busy}
+                  className="border-border-subtle"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </IconButton>
+                <IconButton
+                  label="Regenerate text"
+                  onClick={handleRegenerate}
+                  disabled={!!busy}
+                  className="border-border-subtle"
+                >
+                  {busy === 'regenerate' ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <RotateCcw className="h-3.5 w-3.5" />
+                  )}
+                </IconButton>
+              </>
+            )}
+          </div>
+          {!isEditing && (
+            <IconButton
+              label="Delete block"
+              onClick={onDelete}
+              disabled={!!busy}
+              tone="danger"
+              className="border-border-subtle"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </IconButton>
           )}
         </div>
       </header>
@@ -179,7 +214,7 @@ export function BlockCard({
             value={draftBody}
             onChange={(event) => setDraftBody(event.target.value)}
             rows={Math.max(6, Math.min(20, draftBody.split('\n').length + 2))}
-            className="border-border-subtle bg-surface text-fg focus:border-accent w-full resize-y rounded-md border px-3 py-2 font-mono text-xs leading-relaxed outline-none"
+            className="border-border-subtle bg-surface text-fg focus:border-accent w-full resize-y rounded-md border px-3 py-2 font-mono text-sm leading-relaxed outline-none"
             placeholder="Block body (markdown)"
           />
         ) : (
@@ -187,7 +222,7 @@ export function BlockCard({
         )}
 
         {block.imageUrl && !isEditing && (
-          <div className="border-border-subtle mt-4 overflow-hidden rounded-lg border">
+          <figure className="border-border-subtle mt-4 overflow-hidden rounded-lg border">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={block.imageUrl}
@@ -195,11 +230,12 @@ export function BlockCard({
               className="h-auto w-full"
             />
             {block.imagePrompt && (
-              <p className="text-fg-muted bg-surface px-3 py-2 text-[11px] italic">
-                {block.imagePrompt}
-              </p>
+              <figcaption className="text-fg-muted bg-surface flex gap-2 px-3 py-2 text-[11px] italic">
+                <span className="text-fg-subtle not-italic">Prompt</span>
+                <span className="min-w-0 flex-1">{block.imagePrompt}</span>
+              </figcaption>
             )}
-          </div>
+          </figure>
         )}
 
         {!isEditing && (
@@ -208,7 +244,7 @@ export function BlockCard({
               type="button"
               onClick={() => setShowImagePromptInput((v) => !v)}
               disabled={!!busy}
-              className="border-border-subtle bg-surface text-fg-muted hover:text-fg inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium disabled:opacity-50"
+              className="border-border-subtle bg-surface text-fg-muted hover:text-fg inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors disabled:opacity-50"
             >
               <ImageIcon className="h-3 w-3" />
               {block.imageUrl ? 'Regenerate image' : 'Generate image'}
@@ -241,7 +277,10 @@ export function BlockCard({
         )}
 
         {error && (
-          <p className="border-danger/30 bg-danger/10 text-danger mt-3 rounded-md border px-3 py-2 text-xs">
+          <p
+            role="alert"
+            className="border-danger/30 bg-danger/10 text-danger mt-3 rounded-md border px-3 py-2 text-xs"
+          >
             {error}
           </p>
         )}
@@ -267,13 +306,25 @@ type IconButtonProps = {
   label: string;
   onClick: () => void;
   disabled?: boolean;
-  tone?: 'default' | 'danger';
+  tone?: 'default' | 'primary' | 'danger';
+  className?: string;
   children: React.ReactNode;
 };
 
-function IconButton({ label, onClick, disabled, tone = 'default', children }: IconButtonProps) {
+function IconButton({
+  label,
+  onClick,
+  disabled,
+  tone = 'default',
+  className = '',
+  children,
+}: IconButtonProps) {
   const toneClass =
-    tone === 'danger' ? 'text-fg-muted hover:text-danger' : 'text-fg-muted hover:text-fg';
+    tone === 'danger'
+      ? 'text-fg-muted hover:text-danger'
+      : tone === 'primary'
+        ? 'text-accent hover:bg-accent/10'
+        : 'text-fg-muted hover:text-fg';
   return (
     <button
       type="button"
@@ -281,7 +332,7 @@ function IconButton({ label, onClick, disabled, tone = 'default', children }: Ic
       disabled={disabled}
       aria-label={label}
       title={label}
-      className={`border-border-subtle bg-surface flex h-7 w-7 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${toneClass}`}
+      className={`flex h-7 w-7 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${toneClass} ${className}`}
     >
       {children}
     </button>
