@@ -49,6 +49,34 @@
   --duration-base: 220ms;
   --duration-slow: 360ms;
 
+  /* Brand gradient — purple → magenta → cyan. Used by the logo wordmark,
+     active-tab accent bar, and the gradient-mesh background blobs. */
+  --gradient-brand: linear-gradient(135deg, #a78bfa 0%, #c084fc 35%, #f0abfc 65%, #67e8f9 100%);
+  --gradient-brand-soft: linear-gradient(
+    135deg,
+    rgba(167, 139, 250, 0.2) 0%,
+    rgba(192, 132, 252, 0.18) 50%,
+    rgba(103, 232, 249, 0.15) 100%
+  );
+  --gradient-mesh-1: radial-gradient(
+    ellipse 60% 50% at 20% 10%,
+    rgba(167, 139, 250, 0.18) 0%,
+    transparent 60%
+  );
+  --gradient-mesh-2: radial-gradient(
+    ellipse 50% 40% at 85% 30%,
+    rgba(192, 132, 252, 0.15) 0%,
+    transparent 60%
+  );
+  --gradient-mesh-3: radial-gradient(
+    ellipse 50% 50% at 60% 90%,
+    rgba(103, 232, 249, 0.12) 0%,
+    transparent 60%
+  );
+
+  --shadow-glow-accent: 0 0 32px -8px rgba(167, 139, 250, 0.45);
+  --shadow-glow-accent-strong: 0 0 48px -8px rgba(167, 139, 250, 0.65);
+
   /* Typography — major-third scale, 16px base, optical restraint.
      See: pbakaus/typeset principles (line-height rhythm, weight restraint,
      letter-spacing tightening at large sizes). */
@@ -112,6 +140,32 @@
   --shadow-md: 0 4px 12px rgba(20, 20, 30, 0.06);
   --shadow-lg: 0 12px 32px rgba(20, 20, 30, 0.08);
   --shadow-overlay: 0 24px 64px rgba(20, 20, 30, 0.12);
+
+  --gradient-brand: linear-gradient(135deg, #7c3aed 0%, #a855f7 35%, #d946ef 65%, #0891b2 100%);
+  --gradient-brand-soft: linear-gradient(
+    135deg,
+    rgba(124, 58, 237, 0.18) 0%,
+    rgba(168, 85, 247, 0.15) 50%,
+    rgba(8, 145, 178, 0.12) 100%
+  );
+  --gradient-mesh-1: radial-gradient(
+    ellipse 60% 50% at 20% 10%,
+    rgba(124, 58, 237, 0.12) 0%,
+    transparent 60%
+  );
+  --gradient-mesh-2: radial-gradient(
+    ellipse 50% 40% at 85% 30%,
+    rgba(217, 70, 239, 0.1) 0%,
+    transparent 60%
+  );
+  --gradient-mesh-3: radial-gradient(
+    ellipse 50% 50% at 60% 90%,
+    rgba(8, 145, 178, 0.08) 0%,
+    transparent 60%
+  );
+
+  --shadow-glow-accent: 0 0 32px -8px rgba(124, 58, 237, 0.4);
+  --shadow-glow-accent-strong: 0 0 48px -8px rgba(124, 58, 237, 0.55);
 }
 
 @theme inline {
@@ -151,6 +205,9 @@
   --duration-fast: var(--duration-fast);
   --duration-base: var(--duration-base);
   --duration-slow: var(--duration-slow);
+
+  --shadow-glow-accent: var(--shadow-glow-accent);
+  --shadow-glow-accent-strong: var(--shadow-glow-accent-strong);
 
   /* Typography utilities — `text-h1`, `text-body`, `text-caption`, etc.
      Tailwind v4 picks up `--text-X` as font-size, with `--text-X--line-height`
@@ -287,4 +344,89 @@ a:focus-visible,
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ─── Brand gradient utilities ──────────────────────────────────────────
+   Used by the logo wordmark + active tab accent bar. */
+.text-gradient-brand {
+  background-image: var(--gradient-brand);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.bg-gradient-brand {
+  background-image: var(--gradient-brand);
+}
+
+.bg-gradient-brand-soft {
+  background-image: var(--gradient-brand-soft);
+}
+
+/* Decorative background mesh — three radial-gradient blobs layered on top
+   of the base background. Pure CSS, no JS, sits behind all content. */
+.bg-mesh {
+  background-image: var(--gradient-mesh-1), var(--gradient-mesh-2), var(--gradient-mesh-3);
+  background-repeat: no-repeat;
+}
+
+/* Slow drift for the decorative blobs in the right pane.
+   30s+ loop so it reads as ambient, not animated. */
+@keyframes mesh-drift-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(2%, -3%, 0) scale(1.05);
+  }
+}
+
+@keyframes mesh-drift-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-3%, 2%, 0) scale(1.08);
+  }
+}
+
+@keyframes mesh-drift-c {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(1.5%, 2.5%, 0) scale(0.95);
+  }
+}
+
+.mesh-blob-a {
+  animation: mesh-drift-a 28s ease-in-out infinite;
+}
+.mesh-blob-b {
+  animation: mesh-drift-b 34s ease-in-out infinite;
+}
+.mesh-blob-c {
+  animation: mesh-drift-c 40s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mesh-blob-a,
+  .mesh-blob-b,
+  .mesh-blob-c {
+    animation: none;
+  }
+}
+
+/* Logo mark — the 4-pointed star pulses the gradient via a CSS variable
+   fill. Kept here so the logo can stay a single inline SVG. */
+.logo-mark {
+  background-image: var(--gradient-brand);
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'><path d='M12 1.5l2.3 6.4 6.4 2.3-6.4 2.3L12 18.9l-2.3-6.4-6.4-2.3 6.4-2.3L12 1.5z'/><circle cx='19' cy='5' r='1.3'/><circle cx='5' cy='19' r='1'/></svg>")
+    center / contain no-repeat;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'><path d='M12 1.5l2.3 6.4 6.4 2.3-6.4 2.3L12 18.9l-2.3-6.4-6.4-2.3 6.4-2.3L12 1.5z'/><circle cx='19' cy='5' r='1.3'/><circle cx='5' cy='19' r='1'/></svg>")
+    center / contain no-repeat;
 }

@@ -1,289 +1,276 @@
 'use client';
 
-import {
-  ArrowRight,
-  BookOpen,
-  Calendar,
-  ClipboardList,
-  FileCheck2,
-  Sparkles,
-  Wand2,
-  type LucideIcon,
-} from 'lucide-react';
+import { Sparkles, Trash2, Download, ArrowRight, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
-import { useCallback, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
-import { useProfile } from '@/lib/use-profile';
-import { useRecentWork, type RecentItem } from '@/lib/use-recent-work';
+import { useCallback, useState } from 'react';
 import {
+  ChatInput,
+  ErrorChip,
+  Messages,
+  QuickActions,
+  exportConversationAsDocx,
+} from '@/features/chat';
+import { Sidebar } from '@/features/shell/sidebar';
+import { useAgentChat } from '@/lib/use-agent-chat';
+import { useProfile } from '@/lib/use-profile';
+import {
+  FadeIn,
   FadeInDown,
   FadeInUp,
-  PressableCard,
-  ScaleIn,
   StaggerContainer,
   StaggerItem,
 } from '@/components/ui/motion';
-import { EmptyState } from '@/components/ui/async-states';
 
-const SEND_MESSAGE_EVENT = 'teachwise:send-message';
+export default function DashboardPage() {
+  const { profile } = useProfile();
+  const { messages, status, error, sendMessage, retry, stop, reset } = useAgentChat({
+    teacherPrefs: profile,
+  });
+  const [draft, setDraft] = useState('');
+  const [errorDismissed, setErrorDismissed] = useState(false);
 
-type ExamplePrompt = {
-  text: string;
-  icon: LucideIcon;
-};
+  const isBusy = status === 'sending' || status === 'streaming';
+  const isEmpty = messages.length === 0;
+  const showError = error && !errorDismissed;
 
-const EXAMPLE_PROMPTS: readonly ExamplePrompt[] = [
-  {
-    text: 'Plan a 60-minute Year 4 Maths lesson on fractions',
-    icon: Calendar,
-  },
-  {
-    text: "Mark this student's persuasive writing against the rubric",
-    icon: FileCheck2,
-  },
-  {
-    text: 'Build a 3-week unit on Australian bushfires',
-    icon: BookOpen,
-  },
-  {
-    text: 'Draft a rubric for oral presentations',
-    icon: ClipboardList,
-  },
-] as const;
+  const handleSubmit = useCallback(async () => {
+    if (!draft.trim()) return;
+    const text = draft;
+    setDraft('');
+    setErrorDismissed(false);
+    await sendMessage(text);
+  }, [draft, sendMessage]);
 
-const FEATURE_META: Record<RecentItem['feature'], { icon: LucideIcon; href: string }> = {
-  planner: { icon: Calendar, href: '/planner' },
-  unit: { icon: BookOpen, href: '/units' },
-  rubric: { icon: ClipboardList, href: '/rubric' },
-  automark: { icon: FileCheck2, href: '/automark' },
-};
+  const handleQuickAction = useCallback(
+    (prompt: string) => {
+      setErrorDismissed(false);
+      void sendMessage(prompt);
+    },
+    [sendMessage],
+  );
 
-function sendToChat(text: string) {
-  const trimmed = text.trim();
-  if (!trimmed) return;
-  window.dispatchEvent(new CustomEvent(SEND_MESSAGE_EVENT, { detail: { text: trimmed } }));
+  const handleExport = useCallback(async () => {
+    if (messages.length === 0) return;
+    await exportConversationAsDocx(messages);
+  }, [messages]);
+
+  const greeting = buildGreeting(profile.name, profile.yearLevel, profile.subject);
+
+  return (
+    <div className="bg-bg flex h-full flex-row overflow-hidden">
+      <Sidebar />
+
+      <main className="bg-mesh relative flex flex-1 flex-col overflow-hidden">
+        {/* Decorative gradient blobs — slow drift, very low opacity. */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="mesh-blob-a bg-gradient-brand-soft absolute -top-32 -left-32 h-96 w-96 rounded-full opacity-50 blur-3xl" />
+          <div className="mesh-blob-b bg-gradient-brand-soft absolute top-1/3 -right-32 h-[28rem] w-[28rem] rounded-full opacity-40 blur-3xl" />
+          <div className="mesh-blob-c bg-gradient-brand-soft absolute -bottom-24 left-1/3 h-80 w-80 rounded-full opacity-30 blur-3xl" />
+        </div>
+
+        {/* Toolbar */}
+        <FadeInDown>
+          <div className="border-border-subtle bg-surface/60 supports-[backdrop-filter]:bg-surface/40 relative z-10 flex items-center justify-between border-b px-5 py-3 backdrop-blur-md">
+            <div className="flex items-center gap-2.5">
+              <div className="bg-accent-soft text-accent flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium">
+                <Sparkles className="h-3 w-3" />
+                Chat
+              </div>
+              <span className="text-fg-subtle hidden text-xs sm:inline">
+                ⌘+enter to send · ? for shortcuts
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              {messages.length > 0 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={reset}
+                    aria-label="New conversation"
+                    className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg flex h-7 items-center gap-1.5 rounded-md border px-2 text-xs font-medium transition-colors duration-(--duration-fast) ease-(--ease-out)"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    <span className="hidden sm:inline">Clear</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExport}
+                    aria-label="Export conversation as docx"
+                    className="border-border-subtle bg-surface-raised text-fg-muted hover:text-fg flex h-7 items-center gap-1.5 rounded-md border px-2 text-xs font-medium transition-colors duration-(--duration-fast) ease-(--ease-out)"
+                  >
+                    <Download className="h-3 w-3" />
+                    <span className="hidden sm:inline">Export</span>
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </FadeInDown>
+
+        {/* Scroll region — greeting or thread */}
+        <div className="relative z-10 flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-3xl px-6 py-8 sm:px-8 sm:py-10">
+            {isEmpty ? (
+              <FadeIn className="flex flex-col gap-8">
+                <FadeInUp>
+                  <GreetingBlock
+                    title={greeting.title}
+                    subtitle={greeting.subtitle}
+                    name={profile.name ?? undefined}
+                    yearLevel={profile.yearLevel ?? undefined}
+                    subject={profile.subject ?? undefined}
+                    state={profile.state ?? undefined}
+                  />
+                </FadeInUp>
+                <FadeInUp delay={0.08}>
+                  <QuickActions onSelect={handleQuickAction} disabled={isBusy} profile={profile} />
+                </FadeInUp>
+                <FadeInUp delay={0.16}>
+                  <FeatureShortcuts />
+                </FadeInUp>
+              </FadeIn>
+            ) : (
+              <>
+                <Messages messages={messages} status={status} />
+                {showError ? (
+                  <div className="mt-6">
+                    <ErrorChip
+                      message={error}
+                      disabled={isBusy}
+                      onRetry={() => {
+                        setErrorDismissed(false);
+                        void retry();
+                      }}
+                      onDismiss={() => setErrorDismissed(true)}
+                    />
+                  </div>
+                ) : null}
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Input dock — sticky at bottom with backdrop blur. */}
+        <div className="border-border-subtle bg-surface/70 supports-[backdrop-filter]:bg-surface/50 relative z-10 border-t backdrop-blur-xl">
+          <div className="mx-auto w-full max-w-3xl px-4 py-3 sm:px-6 sm:py-4">
+            <ChatInput
+              value={draft}
+              onChange={setDraft}
+              onSubmit={handleSubmit}
+              onStop={stop}
+              isBusy={isBusy}
+              placeholder={isEmpty ? 'Or describe what you need…' : 'Continue the conversation…'}
+            />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 }
 
-function makeGreeting(
+function GreetingBlock({
+  title,
+  subtitle,
+  name,
+  yearLevel,
+  subject,
+  state,
+}: {
+  title: string;
+  subtitle: string;
+  name?: string | undefined;
+  yearLevel?: string | undefined;
+  subject?: string | undefined;
+  state?: string | undefined;
+}) {
+  const contextLine =
+    name && (yearLevel || subject)
+      ? `${[yearLevel, subject].filter(Boolean).join(' ')}${state ? ` · ${state}` : ''}`
+      : null;
+
+  return (
+    <div className="flex flex-col items-start gap-5">
+      <div className="relative">
+        <div
+          aria-hidden
+          className="bg-gradient-brand absolute -inset-2 rounded-2xl opacity-30 blur-2xl"
+        />
+        <div className="bg-gradient-brand text-accent-fg relative flex h-14 w-14 items-center justify-center rounded-2xl shadow-(--shadow-glow-accent-strong)">
+          <Sparkles className="h-7 w-7" />
+        </div>
+      </div>
+      <div>
+        <h1 className="text-fg text-h1 leading-tight tracking-tight">{title}</h1>
+        <p className="text-fg-muted mt-2 text-base leading-relaxed">{subtitle}</p>
+        {contextLine && (
+          <p className="text-fg-subtle mt-3 text-xs font-medium tracking-wide uppercase">
+            {contextLine}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+type Shortcut = { href: string; label: string; description: string; icon: LucideIcon };
+
+const SHORTCUTS: readonly Shortcut[] = [
+  { href: '/planner', label: 'Planner', description: 'Block-based lessons', icon: ArrowRight },
+  { href: '/units', label: 'Units', description: 'Multi-week plans', icon: ArrowRight },
+  { href: '/rubric', label: 'Rubrics', description: 'Matrix scoring', icon: ArrowRight },
+  { href: '/automark', label: 'Automark', description: 'Mark student work', icon: ArrowRight },
+];
+
+function FeatureShortcuts() {
+  return (
+    <section aria-label="Quick feature shortcuts" className="flex flex-col gap-3">
+      <h2 className="text-fg-muted text-caption font-semibold tracking-wide uppercase">
+        Or jump to a workspace
+      </h2>
+      <StaggerContainer delay={0.04} className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+        {SHORTCUTS.map((shortcut) => {
+          const Icon = shortcut.icon;
+          return (
+            <StaggerItem key={shortcut.href}>
+              <Link
+                href={shortcut.href}
+                className="group border-border-subtle bg-surface-raised hover:border-accent/40 hover:bg-surface-overlay flex items-center justify-between gap-3 rounded-lg border p-3.5 transition-all duration-(--duration-base) ease-(--ease-out) hover:shadow-(--shadow-glow-accent)"
+              >
+                <div className="min-w-0">
+                  <p className="text-fg text-sm font-semibold">{shortcut.label}</p>
+                  <p className="text-fg-muted text-xs">{shortcut.description}</p>
+                </div>
+                <Icon className="text-fg-subtle group-hover:text-accent h-4 w-4 shrink-0 transition-colors duration-(--duration-fast) ease-(--ease-out) group-hover:translate-x-0.5" />
+              </Link>
+            </StaggerItem>
+          );
+        })}
+      </StaggerContainer>
+    </section>
+  );
+}
+
+function buildGreeting(
   name: string | undefined,
   year: string | undefined,
   subject: string | undefined,
 ) {
   const hasName = !!name && name.trim().length > 0;
   const hasClass = !!year && year.trim().length > 0 && !!subject && subject.trim().length > 0;
-
   if (hasName && hasClass) {
     return {
-      title: `Welcome back, ${name}.`,
-      subtitle: `${year} ${subject}. What are we building today?`,
+      title: `G'day, ${name}.`,
+      subtitle: `What are we building for ${year} ${subject} today?`,
     };
   }
   if (hasName) {
     return {
-      title: `Welcome back, ${name}.`,
+      title: `G'day, ${name}.`,
       subtitle: 'What are we building today?',
     };
   }
   return {
     title: 'Welcome to TeachWise.',
-    subtitle: 'Your AI teaching workspace. What are we building today?',
+    subtitle: 'Your AI teaching workspace. Draft lessons, rubrics, report comments — fast.',
   };
-}
-
-function formatRelativeTime(ms: number): string {
-  const diff = Date.now() - ms;
-  const minute = 60 * 1000;
-  const hour = 60 * minute;
-  const day = 24 * hour;
-  if (diff < minute) return 'just now';
-  if (diff < hour) return `${Math.floor(diff / minute)} min ago`;
-  if (diff < day) return `${Math.floor(diff / hour)} hr ago`;
-  if (diff < 7 * day)
-    return `${Math.floor(diff / day)} day${Math.floor(diff / day) === 1 ? '' : 's'} ago`;
-  return new Date(ms).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
-}
-
-function RecentWorkCard({ item }: { item: RecentItem }) {
-  const meta = FEATURE_META[item.feature];
-  const Icon = meta.icon;
-  return (
-    <PressableCard
-      onClick={() => {
-        window.location.href = meta.href;
-      }}
-      className="border-border-subtle bg-surface-raised hover:bg-surface-overlay min-w-[240px] shrink-0 snap-start rounded-lg border p-4 text-left transition-colors"
-    >
-      <div className="flex items-start gap-3">
-        <div className="bg-accent-soft text-accent flex h-9 w-9 shrink-0 items-center justify-center rounded-md">
-          <Icon className="h-4 w-4" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="text-body-sm text-fg line-clamp-1 font-medium">{item.title}</h3>
-          {item.subtitle ? (
-            <p className="text-caption text-fg-muted mt-0.5">{item.subtitle}</p>
-          ) : null}
-          <p className="text-caption text-fg-subtle mt-2">{formatRelativeTime(item.updatedAt)}</p>
-        </div>
-        <ArrowRight className="text-fg-subtle h-4 w-4 shrink-0" />
-      </div>
-    </PressableCard>
-  );
-}
-
-export default function Home() {
-  const { profile } = useProfile();
-  const recent = useRecentWork(5);
-  const [draft, setDraft] = useState('');
-  const [inputFocused, setInputFocused] = useState(false);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  const greeting = useMemo(
-    () => makeGreeting(profile.name, profile.yearLevel, profile.subject),
-    [profile.name, profile.yearLevel, profile.subject],
-  );
-
-  const hasContent = draft.trim().length > 0;
-
-  const handleSubmit = useCallback(
-    (event?: FormEvent) => {
-      event?.preventDefault();
-      if (!hasContent) return;
-      sendToChat(draft);
-      setDraft('');
-      inputRef.current?.blur();
-    },
-    [draft, hasContent],
-  );
-
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLTextAreaElement>) => {
-      if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
-        event.preventDefault();
-        handleSubmit();
-      }
-    },
-    [handleSubmit],
-  );
-
-  return (
-    <div className="mx-auto max-w-3xl px-6 py-12 sm:px-10 sm:py-16">
-      {/* Greeting */}
-      <FadeInDown>
-        <div className="mb-8">
-          <h1 className="text-h1 text-fg">{greeting.title}</h1>
-          <p className="text-body-lg text-fg-muted mt-2">{greeting.subtitle}</p>
-        </div>
-      </FadeInDown>
-
-      {/* Primary input */}
-      <ScaleIn delay={0.08}>
-        <form onSubmit={handleSubmit} className="mb-3">
-          <div
-            className={`border-border bg-surface-raised rounded-xl border transition-all duration-(--duration-base) ease-(--ease-out) ${
-              inputFocused ? 'border-accent shadow-md' : 'shadow-sm'
-            }`}
-          >
-            <textarea
-              ref={inputRef}
-              value={draft}
-              onChange={(event) => setDraft(event.target.value)}
-              onFocus={() => setInputFocused(true)}
-              onBlur={() => setInputFocused(false)}
-              onKeyDown={handleKeyDown}
-              placeholder="Plan a lesson, draft a rubric, mark work…"
-              role="search"
-              aria-label="Ask the teaching assistant"
-              rows={inputFocused || hasContent ? 4 : 1}
-              className="text-fg placeholder:text-fg-subtle w-full resize-none bg-transparent px-5 py-4 text-base outline-none"
-            />
-            <div className="border-border-subtle flex items-center justify-between border-t px-4 py-2.5">
-              <span className="text-caption text-fg-subtle">⌘+enter to send · ? for shortcuts</span>
-              <button
-                type="submit"
-                disabled={!hasContent}
-                className="bg-accent text-accent-fg text-caption rounded-md px-3 py-1.5 font-medium transition-opacity duration-(--duration-fast) ease-(--ease-out) hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Send
-              </button>
-            </div>
-          </div>
-        </form>
-      </ScaleIn>
-
-      {/* Example prompts */}
-      <FadeInUp delay={0.16}>
-        <section aria-label="Example prompts" className="mt-10">
-          <h2 className="text-caption text-fg-muted mb-3">Try one of these</h2>
-          <StaggerContainer delay={0.04} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {EXAMPLE_PROMPTS.map((prompt) => {
-              const Icon = prompt.icon;
-              return (
-                <StaggerItem key={prompt.text}>
-                  <PressableCard
-                    onClick={() => sendToChat(prompt.text)}
-                    className="border-border-subtle bg-surface-raised hover:bg-surface-overlay block w-full rounded-lg border p-4 text-left transition-colors"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="bg-accent-soft text-accent flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <p className="text-body-sm text-fg leading-snug">{prompt.text}</p>
-                    </div>
-                  </PressableCard>
-                </StaggerItem>
-              );
-            })}
-          </StaggerContainer>
-        </section>
-      </FadeInUp>
-
-      {/* Recent work */}
-      {recent.length > 0 ? (
-        <FadeInUp delay={0.24}>
-          <section aria-label="Recent work" className="mt-10">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-caption text-fg-muted">Recent work</h2>
-              <span className="text-caption text-fg-subtle">
-                {recent.length} item{recent.length === 1 ? '' : 's'}
-              </span>
-            </div>
-            <div className="-mx-2 flex snap-x snap-mandatory gap-3 overflow-x-auto px-2 pb-2">
-              {recent.map((item) => (
-                <RecentWorkCard key={item.id} item={item} />
-              ))}
-            </div>
-          </section>
-        </FadeInUp>
-      ) : (
-        <FadeInUp delay={0.24}>
-          <section aria-label="Recent work" className="mt-10">
-            <h2 className="text-caption text-fg-muted mb-3">Recent work</h2>
-            <div className="border-border-subtle bg-surface-raised rounded-lg border border-dashed">
-              <EmptyState
-                icon={<Wand2 className="h-5 w-5" />}
-                title="Nothing yet"
-                body="Your recent lessons, rubrics, and marked work will appear here."
-                action={
-                  <Link
-                    href="/profile"
-                    className="text-caption text-accent hover:text-accent-hover inline-flex items-center gap-1 font-medium transition-colors"
-                  >
-                    Set up your class
-                    <ArrowRight className="h-3 w-3" />
-                  </Link>
-                }
-              />
-            </div>
-          </section>
-        </FadeInUp>
-      )}
-
-      {/* Feature link, quiet, for when the agentic surface isn't what they need */}
-      <FadeInUp delay={0.32}>
-        <div className="text-caption text-fg-subtle mt-16 flex items-center justify-center gap-2">
-          <Sparkles className="text-accent h-3 w-3" />
-          <span>Phase 3 · All 6 features live</span>
-        </div>
-      </FadeInUp>
-    </div>
-  );
 }
