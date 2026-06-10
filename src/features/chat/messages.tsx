@@ -62,11 +62,7 @@ export function Messages({ messages, status }: MessagesProps) {
                 ) : isStreamingPlaceholder ? (
                   <span className="text-fg-subtle inline-flex items-center gap-1.5 italic">
                     Thinking
-                    <span className="flex gap-1">
-                      <span className="bg-fg-subtle h-1 w-1 animate-pulse rounded-full" />
-                      <span className="bg-fg-subtle h-1 w-1 animate-pulse rounded-full [animation-delay:150ms]" />
-                      <span className="bg-fg-subtle h-1 w-1 animate-pulse rounded-full [animation-delay:300ms]" />
-                    </span>
+                    <span className="caret" aria-hidden />
                   </span>
                 ) : (
                   <MarkdownContent content={message.content} />

@@ -256,6 +256,28 @@ a:focus-visible,
   border-radius: var(--radius-sm);
 }
 
+/* Caret blink — used for streaming "Thinking…" placeholder. */
+@keyframes caret-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 0.85em;
+  background: currentColor;
+  vertical-align: -0.15em;
+  border-radius: 1px;
+  animation: caret-blink 1.06s steps(1) infinite;
+}
+
 /* Reduce-motion respect */
 @media (prefers-reduced-motion: reduce) {
   *,
