@@ -2,8 +2,8 @@
 
 import { ArrowLeft, BookOpen, Download, Settings, Trash2 } from 'lucide-react';
 import Link from 'next/link';
-import { useCallback, useState } from 'react';
-import { LessonsList, UnitForm, UnitHeader, exportUnitAsDocx } from '@/features/units';
+import { useCallback, useRef, useState } from 'react';
+import { ErrorChip, LessonsList, UnitForm, UnitHeader, exportUnitAsDocx } from '@/features/units';
 import type { UnitLesson, UnitPlan } from '@/lib/ai/prompts/units';
 import { useProfile } from '@/lib/use-profile';
 import { useUnit } from '@/lib/use-unit';
@@ -29,12 +29,16 @@ export default function UnitsPage() {
   const { state, setMeta, setPlan, replaceLesson, setCoverImage, clear } = useUnit();
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState<string | null>(null);
+  const lastSubmitRef = useRef<{ topic: string; weeks: number; lessonsPerWeek: number } | null>(
+    null,
+  );
 
   const handleGenerate = useCallback(
     async (topic: string, weeks: number, lessonsPerWeek: number) => {
       setStatus('generating');
       setError(null);
       setMeta({ topic, weeks, lessonsPerWeek });
+      lastSubmitRef.current = { topic, weeks, lessonsPerWeek };
       try {
         const { plan } = await postJson<{ plan: UnitPlan }>('/api/agent/unit', {
           action: 'generate',
@@ -59,6 +63,17 @@ export default function UnitsPage() {
     },
     [profile, setMeta, setPlan],
   );
+
+  const handleRetry = useCallback(() => {
+    const last = lastSubmitRef.current;
+    if (!last) return;
+    void handleGenerate(last.topic, last.weeks, last.lessonsPerWeek);
+  }, [handleGenerate]);
+
+  const handleDismissError = useCallback(() => {
+    setError(null);
+    setStatus('idle');
+  }, []);
 
   const handleRegenerateLesson = useCallback(
     async (lesson: UnitLesson) => {
@@ -199,9 +214,12 @@ export default function UnitsPage() {
         </FadeIn>
 
         {error && status === 'error' && (
-          <FadeIn className="border-danger/30 bg-danger-soft text-danger mt-6 rounded-lg border px-4 py-3 text-sm">
-            {error}
-          </FadeIn>
+          <ErrorChip
+            message={error}
+            disabled={isBusy}
+            onRetry={handleRetry}
+            onDismiss={handleDismissError}
+          />
         )}
 
         {hasPlan && state.plan && (
