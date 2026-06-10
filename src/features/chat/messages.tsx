@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Message } from '@/lib/ai';
 import { fadeInUp } from '@/lib/motion';
+import { InlineMarkdown } from './inline-markdown';
 
 type MessagesProps = {
   messages: Message[];
@@ -58,7 +59,7 @@ export function Messages({ messages, status }: MessagesProps) {
                 }`}
               >
                 {isUser ? (
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  <InlineMarkdown content={message.content} />
                 ) : isStreamingPlaceholder ? (
                   <span className="text-fg-subtle inline-flex items-center gap-1.5 italic">
                     Thinking
