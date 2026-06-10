@@ -4,4 +4,5 @@ export { BlocksList } from '@/features/planner/blocks-list';
 export { BlockMarkdown } from '@/features/planner/block-markdown';
 export { KIND_META } from '@/features/planner/kind-meta';
 export { ErrorChip } from '@/features/planner/error-chip';
+export { BlocksListSkeleton } from '@/features/planner/blocks-list-skeleton';
 export { exportPlannerAsDocx } from '@/features/planner/export-docx';

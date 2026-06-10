@@ -1,13 +1,19 @@
 'use client';
 
-import { ArrowLeft, Calendar, Download, Loader2, Settings, Trash2 } from 'lucide-react';
+import { ArrowLeft, Calendar, Download, Settings, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useRef, useState } from 'react';
-import { BlocksList, ErrorChip, PlannerForm, exportPlannerAsDocx } from '@/features/planner';
+import {
+  BlocksList,
+  BlocksListSkeleton,
+  ErrorChip,
+  PlannerForm,
+  exportPlannerAsDocx,
+} from '@/features/planner';
 import type { PlannerBlock } from '@/lib/ai/prompts/planner';
 import { useProfile } from '@/lib/use-profile';
 import { usePlanner } from '@/lib/use-planner';
-import { FadeIn, FadeInDown, FadeInUp, Pulse } from '@/components/ui/motion';
+import { FadeIn, FadeInDown, FadeInUp } from '@/components/ui/motion';
 
 type Status = 'idle' | 'generating' | 'error';
 
@@ -186,13 +192,10 @@ export default function PlannerPage() {
           />
         </FadeIn>
 
-        {status === 'generating' && (
-          <FadeIn className="text-fg-muted mt-6 flex items-center gap-2 text-sm">
-            <Pulse>
-              <Loader2 className="text-accent h-4 w-4" />
-            </Pulse>
-            Drafting the lesson plan…
-          </FadeIn>
+        {status === 'generating' && !hasBlocks && (
+          <FadeInUp delay={0.1} className="mt-8">
+            <BlocksListSkeleton count={4} />
+          </FadeInUp>
         )}
 
         {error && status === 'error' && (
