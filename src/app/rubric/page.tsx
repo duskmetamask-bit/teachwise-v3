@@ -8,12 +8,13 @@ import {
   RubricForm,
   RubricHeader,
   RubricTable,
+  RubricTableSkeleton,
   exportRubricAsDocx,
 } from '@/features/rubric';
 import type { Rubric, RubricCriterion } from '@/lib/ai/prompts/rubric';
 import { useProfile } from '@/lib/use-profile';
 import { useRubric } from '@/lib/use-rubric';
-import { FadeIn, FadeInDown, FadeInUp, Pulse } from '@/components/ui/motion';
+import { FadeIn, FadeInDown, FadeInUp } from '@/components/ui/motion';
 
 type Status = 'idle' | 'generating' | 'error';
 type BusyKind = 'generate' | 'criterion';
@@ -195,11 +196,8 @@ export default function RubricPage() {
         </FadeIn>
 
         {status === 'generating' && (
-          <FadeIn className="text-fg-muted mt-6 flex items-center gap-2 text-sm">
-            <Pulse>
-              <Loader2 className="text-accent h-4 w-4" />
-            </Pulse>
-            Drafting the rubric…
+          <FadeIn className="mt-8">
+            <RubricTableSkeleton levelCount={state.levelCount} />
           </FadeIn>
         )}
 
