@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Loader2, Pencil, RotateCcw, X } from 'lucide-react';
+import { BookOpen, Check, Loader2, Pencil, RotateCcw, X } from 'lucide-react';
 import { useState } from 'react';
 import type { UnitLesson } from '@/lib/ai/prompts/units';
 import { BlockMarkdown } from '@/features/planner/block-markdown';
@@ -82,45 +82,65 @@ export function LessonCard({ lesson, index, total, onRegenerateText, onEdit }: L
     textToCriteria(draftCriteria).length > 0;
 
   return (
-    <article className="border-border-subtle bg-surface-raised rounded-xl border">
+    <article className="group border-border-subtle bg-surface-raised hover:border-border rounded-xl border transition-colors">
       <header className="border-border-subtle flex items-start justify-between gap-3 border-b px-5 py-3">
-        <div className="min-w-0 flex-1">
-          <div className="text-fg-muted mb-0.5 flex items-center gap-2 text-[11px] font-medium tracking-wide uppercase">
-            <span>Week {lesson.weekNumber}</span>
-            <span className="bg-border-subtle h-3 w-px" />
-            <span>Lesson {lesson.lessonNumber}</span>
-            <span className="bg-border-subtle h-3 w-px" />
-            <span>
-              {index + 1} of {total}
-            </span>
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="bg-accent-soft text-accent flex h-9 w-9 shrink-0 items-center justify-center rounded-md">
+            <BookOpen className="h-4.5 w-4.5" />
           </div>
-          {isEditing ? (
-            <input
-              value={draftTitle}
-              onChange={(event) => setDraftTitle(event.target.value)}
-              className="border-border-subtle bg-surface text-fg focus:border-accent w-full rounded-md border px-2.5 py-1.5 text-sm font-semibold outline-none"
-              placeholder="Lesson title"
-            />
-          ) : (
-            <h3 className="text-fg text-base font-semibold">{lesson.title}</h3>
-          )}
+          <div className="min-w-0 flex-1">
+            <div className="mb-1 flex items-center gap-2">
+              <span className="bg-surface text-fg-muted border-border-subtle rounded-full border px-2 py-0.5 text-[11px] font-medium whitespace-nowrap">
+                Lesson
+              </span>
+              <span className="text-fg-subtle hidden text-[11px] sm:inline">
+                Week {lesson.weekNumber} · Lesson {lesson.lessonNumber} · {index + 1} of {total}
+              </span>
+            </div>
+            {isEditing ? (
+              <input
+                value={draftTitle}
+                onChange={(event) => setDraftTitle(event.target.value)}
+                className="border-border bg-surface text-fg focus:border-accent w-full rounded-md border px-2.5 py-1.5 text-sm font-semibold outline-none"
+                placeholder="Lesson title"
+              />
+            ) : (
+              <h3 className="text-fg text-base leading-snug font-semibold">{lesson.title}</h3>
+            )}
+          </div>
         </div>
         <div className="flex shrink-0 items-center gap-1">
           {isEditing ? (
             <>
-              <IconButton label="Cancel edit" onClick={cancelEdit}>
+              <IconButton label="Cancel edit" onClick={cancelEdit} className="border-border-subtle">
                 <X className="h-3.5 w-3.5" />
               </IconButton>
-              <IconButton label="Save edit" onClick={saveEdit} disabled={!canSave}>
+              <IconButton
+                label="Save edit"
+                onClick={saveEdit}
+                disabled={!canSave}
+                tone="primary"
+                className="border-border-subtle"
+              >
                 <Check className="h-3.5 w-3.5" />
               </IconButton>
             </>
           ) : (
             <>
-              <IconButton label="Edit lesson" onClick={startEdit} disabled={!!busy}>
+              <IconButton
+                label="Edit lesson"
+                onClick={startEdit}
+                disabled={!!busy}
+                className="border-border-subtle"
+              >
                 <Pencil className="h-3.5 w-3.5" />
               </IconButton>
-              <IconButton label="Regenerate lesson" onClick={handleRegenerate} disabled={!!busy}>
+              <IconButton
+                label="Regenerate lesson"
+                onClick={handleRegenerate}
+                disabled={!!busy}
+                className="border-border-subtle"
+              >
                 {busy === 'regenerate' ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 ) : (
@@ -133,51 +153,42 @@ export function LessonCard({ lesson, index, total, onRegenerateText, onEdit }: L
       </header>
 
       <div className="flex flex-col gap-4 px-5 py-4">
-        <div>
-          <div className="text-fg-muted mb-1 text-[11px] font-semibold tracking-wide uppercase">
-            WALT
-          </div>
+        <Section label="WALT" hint="We are learning to…">
           {isEditing ? (
             <textarea
               value={draftWalt}
               onChange={(event) => setDraftWalt(event.target.value)}
               rows={2}
-              className="border-border-subtle bg-surface text-fg focus:border-accent w-full resize-y rounded-md border px-3 py-2 text-sm outline-none"
+              className="border-border-subtle bg-surface text-fg focus:border-accent w-full resize-y rounded-md border px-3 py-2 text-sm leading-relaxed outline-none"
               placeholder="We are learning to…"
             />
           ) : (
-            <p className="text-fg text-sm">{lesson.walt}</p>
+            <p className="text-fg text-sm leading-relaxed">{lesson.walt}</p>
           )}
-        </div>
+        </Section>
 
-        <div>
-          <div className="text-fg-muted mb-1 text-[11px] font-semibold tracking-wide uppercase">
-            Success criteria
-          </div>
+        <Section label="Success criteria" hint="One criterion per line">
           {isEditing ? (
             <textarea
               value={draftCriteria}
               onChange={(event) => setDraftCriteria(event.target.value)}
               rows={Math.max(3, Math.min(8, lesson.successCriteria.length + 1))}
-              className="border-border-subtle bg-surface text-fg focus:border-accent w-full resize-y rounded-md border px-3 py-2 text-sm outline-none"
+              className="border-border-subtle bg-surface text-fg focus:border-accent w-full resize-y rounded-md border px-3 py-2 text-sm leading-relaxed outline-none"
               placeholder="One criterion per line"
             />
           ) : (
             <ul className="flex flex-col gap-1.5">
               {lesson.successCriteria.map((criterion, i) => (
-                <li key={i} className="text-fg flex items-start gap-2 text-sm">
+                <li key={i} className="text-fg flex items-start gap-2 text-sm leading-relaxed">
                   <span className="text-accent mt-0.5 shrink-0">•</span>
                   <span>{criterion}</span>
                 </li>
               ))}
             </ul>
           )}
-        </div>
+        </Section>
 
-        <div>
-          <div className="text-fg-muted mb-1 text-[11px] font-semibold tracking-wide uppercase">
-            Lesson sequence
-          </div>
+        <Section label="Lesson sequence" hint="Markdown supported">
           {isEditing ? (
             <textarea
               value={draftBody}
@@ -189,10 +200,13 @@ export function LessonCard({ lesson, index, total, onRegenerateText, onEdit }: L
           ) : (
             <BlockMarkdown content={lesson.body} />
           )}
-        </div>
+        </Section>
 
         {error && (
-          <p className="border-danger/30 bg-danger/10 text-danger rounded-md border px-3 py-2 text-xs">
+          <p
+            role="alert"
+            className="border-danger/30 bg-danger/10 text-danger rounded-md border px-3 py-2 text-xs"
+          >
             {error}
           </p>
         )}
@@ -201,17 +215,47 @@ export function LessonCard({ lesson, index, total, onRegenerateText, onEdit }: L
   );
 }
 
+type SectionProps = {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+};
+
+function Section({ label, hint, children }: SectionProps) {
+  return (
+    <section className="flex flex-col gap-1.5">
+      <div className="flex items-baseline justify-between gap-2">
+        <h4 className="text-fg-muted text-[11px] font-semibold tracking-wide uppercase">{label}</h4>
+        {hint && <span className="text-fg-subtle text-[10px] italic">{hint}</span>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 type IconButtonProps = {
   label: string;
   onClick: () => void;
   disabled?: boolean;
-  tone?: 'default' | 'danger';
+  tone?: 'default' | 'primary' | 'danger';
+  className?: string;
   children: React.ReactNode;
 };
 
-function IconButton({ label, onClick, disabled, tone = 'default', children }: IconButtonProps) {
+function IconButton({
+  label,
+  onClick,
+  disabled,
+  tone = 'default',
+  className = '',
+  children,
+}: IconButtonProps) {
   const toneClass =
-    tone === 'danger' ? 'text-fg-muted hover:text-danger' : 'text-fg-muted hover:text-fg';
+    tone === 'danger'
+      ? 'text-fg-muted hover:text-danger'
+      : tone === 'primary'
+        ? 'text-accent hover:bg-accent/10'
+        : 'text-fg-muted hover:text-fg';
   return (
     <button
       type="button"
@@ -219,7 +263,7 @@ function IconButton({ label, onClick, disabled, tone = 'default', children }: Ic
       disabled={disabled}
       aria-label={label}
       title={label}
-      className={`border-border-subtle bg-surface flex h-7 w-7 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${toneClass}`}
+      className={`flex h-7 w-7 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${toneClass} ${className}`}
     >
       {children}
     </button>
