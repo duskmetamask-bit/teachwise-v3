@@ -3,29 +3,39 @@
 import { ArrowLeft, Download, Settings, Sparkles, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
-import { ChatInput, Messages, QuickActions, exportConversationAsDocx } from '@/features/chat';
+import {
+  ChatInput,
+  ErrorChip,
+  Messages,
+  QuickActions,
+  exportConversationAsDocx,
+} from '@/features/chat';
 import { useAgentChat } from '@/lib/use-agent-chat';
 import { useProfile } from '@/lib/use-profile';
 import { FadeIn, FadeInDown, FadeInUp } from '@/components/ui/motion';
 
 export default function ChatPage() {
   const { profile } = useProfile();
-  const { messages, status, error, sendMessage, stop, reset } = useAgentChat({
+  const { messages, status, error, sendMessage, retry, stop, reset } = useAgentChat({
     teacherPrefs: profile,
   });
   const [draft, setDraft] = useState('');
+  const [errorDismissed, setErrorDismissed] = useState(false);
 
   const isBusy = status === 'sending' || status === 'streaming';
   const isEmpty = messages.length === 0;
+  const showError = error && !errorDismissed;
 
   async function handleSubmit() {
     if (!draft.trim()) return;
     const text = draft;
     setDraft('');
+    setErrorDismissed(false);
     await sendMessage(text);
   }
 
   function handleQuickAction(prompt: string) {
+    setErrorDismissed(false);
     void sendMessage(prompt);
   }
 
@@ -113,14 +123,19 @@ export default function ChatPage() {
         ) : (
           <Messages messages={messages} status={status} />
         )}
-        {error && (
-          <div
-            role="alert"
-            className="border-danger/30 bg-danger-soft text-danger text-caption mt-6 rounded-lg border px-4 py-3"
-          >
-            {error}
-          </div>
-        )}
+        {showError ? (
+          <ul className="mt-6 flex flex-col gap-6" aria-label="Chat transcript">
+            <ErrorChip
+              message={error}
+              disabled={isBusy}
+              onRetry={() => {
+                setErrorDismissed(false);
+                void retry();
+              }}
+              onDismiss={() => setErrorDismissed(true)}
+            />
+          </ul>
+        ) : null}
       </div>
 
       <div className="border-border-subtle bg-surface/80 supports-[backdrop-filter]:bg-surface/60 border-t backdrop-blur">

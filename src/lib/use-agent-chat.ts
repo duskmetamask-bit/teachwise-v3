@@ -30,6 +30,7 @@ type UseAgentChatResult = {
   status: ChatStatus;
   error: string | null;
   sendMessage: (text: string) => Promise<void>;
+  retry: () => Promise<void>;
   stop: () => void;
   reset: () => void;
 };
@@ -54,16 +55,14 @@ export function useAgentChat({ teacherPrefs = {} }: UseAgentChatOptions = {}): U
     setStatus('idle');
   }, [abortController]);
 
-  const sendMessage = useCallback(
-    async (text: string) => {
-      const trimmed = text.trim();
-      if (!trimmed) return;
-
-      const userMessage: Message = { role: 'user', content: trimmed };
-      const assistantPlaceholder: Message = { role: 'assistant', content: '' };
-      const history: Message[] = [...messages, userMessage];
-
-      setMessages((current) => [...current, userMessage, assistantPlaceholder]);
+  /**
+   * Stream an assistant response into the *current* last assistant slot
+   * (which the caller has just appended). Used by both `sendMessage` (which
+   * appends a new user + assistant pair) and `retry` (which re-uses the
+   * existing user message and appends only a new assistant placeholder).
+   */
+  const streamIntoLast = useCallback(
+    async (history: Message[]) => {
       setStatus('sending');
       setError(null);
 
@@ -171,8 +170,49 @@ export function useAgentChat({ teacherPrefs = {} }: UseAgentChatOptions = {}): U
         });
       }
     },
-    [messages, teacherPrefs],
+    [teacherPrefs],
   );
 
-  return { messages, status, error, sendMessage, stop, reset };
+  const sendMessage = useCallback(
+    async (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+
+      const userMessage: Message = { role: 'user', content: trimmed };
+      const assistantPlaceholder: Message = { role: 'assistant', content: '' };
+
+      // Read the latest messages synchronously via the functional updater, then
+      // build the history payload from the same source so the request includes
+      // the new user turn.
+      let history: Message[] = [];
+      setMessages((current) => {
+        history = [...current, userMessage];
+        return [...current, userMessage, assistantPlaceholder];
+      });
+      await streamIntoLast(history);
+    },
+    [streamIntoLast],
+  );
+
+  const retry = useCallback(async () => {
+    if (status === 'sending' || status === 'streaming') return;
+    // Use the latest messages snapshot from the render closure so the
+    // decision is synchronous; the alternative — reading inside a
+    // `setMessages` updater — runs the updater asynchronously and the
+    // `lastUser` variable stays undefined when we read it after.
+    let lastUser: Message | undefined;
+    for (let i = messages.length - 1; i >= 0; i -= 1) {
+      const m = messages[i];
+      if (m && m.role === 'user') {
+        lastUser = m;
+        break;
+      }
+    }
+    if (!lastUser) return;
+    const truncated = messages.slice(0, messages.indexOf(lastUser) + 1);
+    setMessages([...truncated, { role: 'assistant', content: '' }]);
+    await streamIntoLast(truncated);
+  }, [messages, status, streamIntoLast]);
+
+  return { messages, status, error, sendMessage, retry, stop, reset };
 }
