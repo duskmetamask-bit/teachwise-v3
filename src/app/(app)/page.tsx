@@ -57,7 +57,7 @@ export default function DashboardPage() {
   const greeting = buildGreeting(profile.name, profile.yearLevel, profile.subject);
 
   return (
-    <div className="bg-bg flex h-full flex-row overflow-hidden">
+    <div className="bg-bg flex h-screen flex-row overflow-hidden">
       <Sidebar />
 
       <main className="bg-mesh relative flex flex-1 flex-col overflow-hidden">
