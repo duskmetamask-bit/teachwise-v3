@@ -102,7 +102,7 @@ export function BlockCard({
   const canMoveDown = index < total - 1 && !busy && !isEditing;
 
   return (
-    <article className="border-border-subtle bg-surface-raised hover:border-border rounded-xl border transition-colors">
+    <article className="group border-border-subtle bg-surface-raised hover:border-border rounded-xl border transition-colors">
       <header className="border-border-subtle flex items-start justify-between gap-3 border-b px-5 py-3">
         <div className="flex min-w-0 items-start gap-3">
           <div className="bg-accent-soft text-accent flex h-9 w-9 shrink-0 items-center justify-center rounded-md">
@@ -209,20 +209,8 @@ export function BlockCard({
       </header>
 
       <div className="px-5 py-4">
-        {isEditing ? (
-          <textarea
-            value={draftBody}
-            onChange={(event) => setDraftBody(event.target.value)}
-            rows={Math.max(6, Math.min(20, draftBody.split('\n').length + 2))}
-            className="border-border-subtle bg-surface text-fg focus:border-accent w-full resize-y rounded-md border px-3 py-2 font-mono text-sm leading-relaxed outline-none"
-            placeholder="Block body (markdown)"
-          />
-        ) : (
-          <BlockMarkdown content={block.body} />
-        )}
-
         {block.imageUrl && !isEditing && (
-          <figure className="border-border-subtle mt-4 overflow-hidden rounded-lg border">
+          <figure className="border-border-subtle mb-4 overflow-hidden rounded-lg border">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={block.imageUrl}
@@ -238,16 +226,37 @@ export function BlockCard({
           </figure>
         )}
 
+        {isEditing ? (
+          <textarea
+            value={draftBody}
+            onChange={(event) => setDraftBody(event.target.value)}
+            rows={Math.max(6, Math.min(20, draftBody.split('\n').length + 2))}
+            className="border-border-subtle bg-surface text-fg focus:border-accent w-full resize-y rounded-md border px-3 py-2 font-mono text-sm leading-relaxed outline-none"
+            placeholder="Block body (markdown)"
+          />
+        ) : (
+          <BlockMarkdown content={block.body} />
+        )}
+
         {!isEditing && (
-          <div className="border-border-subtle mt-4 flex flex-wrap items-center gap-2 border-t pt-3">
+          <div
+            className={`mt-4 flex flex-wrap items-center gap-2 ${
+              block.imageUrl ? 'border-border-subtle border-t pt-3' : ''
+            }`}
+          >
             <button
               type="button"
               onClick={() => setShowImagePromptInput((v) => !v)}
               disabled={!!busy}
-              className="border-border-subtle bg-surface text-fg-muted hover:text-fg inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors disabled:opacity-50"
+              aria-expanded={showImagePromptInput}
+              className={`border-border-subtle bg-surface text-fg-muted hover:text-fg hover:border-border inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-all duration-(--duration-fast) ease-(--ease-out) disabled:opacity-50 ${
+                showImagePromptInput
+                  ? 'opacity-100'
+                  : 'opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100'
+              }`}
             >
               <ImageIcon className="h-3 w-3" />
-              {block.imageUrl ? 'Regenerate image' : 'Generate image'}
+              {block.imageUrl ? 'Regenerate image' : 'Add illustration'}
             </button>
             {showImagePromptInput && (
               <>
