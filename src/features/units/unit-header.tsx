@@ -1,6 +1,6 @@
 'use client';
 
-import { ImageIcon, Loader2, Tag } from 'lucide-react';
+import { ImageIcon, Loader2, RefreshCw, Tag } from 'lucide-react';
 import { useState } from 'react';
 import type { UnitLesson, UnitPlan } from '@/lib/ai/prompts/units';
 import { BlockMarkdown } from '@/features/planner/block-markdown';
@@ -52,23 +52,25 @@ export function UnitHeader({ plan, topic, onGenerateCover }: UnitHeaderProps) {
 
   return (
     <section className="flex flex-col gap-5">
-      <div className="border-border-subtle bg-surface-raised overflow-hidden rounded-xl border">
+      <figure className="group border-border-subtle bg-surface-raised overflow-hidden rounded-xl border">
         {plan.coverImageUrl ? (
-          <div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={plan.coverImageUrl}
-              alt={plan.coverImagePrompt ?? `${topic} cover`}
-              className="h-56 w-full object-cover"
-            />
+          <div className="bg-surface relative">
+            <div className="aspect-21/9 w-full">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={plan.coverImageUrl}
+                alt={plan.coverImagePrompt ?? `${topic} cover`}
+                className="h-full w-full object-cover"
+              />
+            </div>
             {plan.coverImagePrompt && (
-              <p className="text-fg-muted bg-surface border-border-subtle border-t px-4 py-2 text-[11px] italic">
+              <figcaption className="text-fg-muted bg-surface border-border-subtle border-t px-4 py-2 text-[11px] italic">
                 {plan.coverImagePrompt}
-              </p>
+              </figcaption>
             )}
           </div>
         ) : (
-          <div className="bg-surface text-fg-muted flex h-44 items-center justify-center text-sm">
+          <div className="bg-surface text-fg-muted flex aspect-21/9 w-full items-center justify-center text-sm">
             No cover image yet.
           </div>
         )}
@@ -77,9 +79,18 @@ export function UnitHeader({ plan, topic, onGenerateCover }: UnitHeaderProps) {
             type="button"
             onClick={() => setShowPromptInput((v) => !v)}
             disabled={isBusy}
-            className="border-border-subtle bg-surface text-fg-muted hover:text-fg inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium disabled:opacity-50"
+            aria-expanded={showPromptInput}
+            className={`border-border-subtle bg-surface text-fg-muted hover:text-fg hover:border-border inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-all duration-(--duration-fast) ease-(--ease-out) disabled:opacity-50 ${
+              showPromptInput
+                ? 'opacity-100'
+                : 'opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100'
+            }`}
           >
-            <ImageIcon className="h-3 w-3" />
+            {plan.coverImageUrl ? (
+              <RefreshCw className="h-3 w-3" />
+            ) : (
+              <ImageIcon className="h-3 w-3" />
+            )}
             {plan.coverImageUrl ? 'Regenerate cover' : 'Generate cover'}
           </button>
           {showPromptInput && (
@@ -108,11 +119,14 @@ export function UnitHeader({ plan, topic, onGenerateCover }: UnitHeaderProps) {
           )}
         </div>
         {error && (
-          <p className="border-danger/30 bg-danger/10 text-danger border-t px-4 py-2 text-xs">
+          <p
+            role="alert"
+            className="border-danger/30 bg-danger/10 text-danger border-t px-4 py-2 text-xs"
+          >
             {error}
           </p>
         )}
-      </div>
+      </figure>
 
       {plan.overview && (
         <Section title="Overview">
