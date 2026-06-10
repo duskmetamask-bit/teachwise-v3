@@ -3,7 +3,14 @@
 import { ArrowLeft, BookOpen, Download, Settings, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useRef, useState } from 'react';
-import { ErrorChip, LessonsList, UnitForm, UnitHeader, exportUnitAsDocx } from '@/features/units';
+import {
+  ErrorChip,
+  LessonsList,
+  LessonsListSkeleton,
+  UnitForm,
+  UnitHeader,
+  exportUnitAsDocx,
+} from '@/features/units';
 import type { UnitLesson, UnitPlan } from '@/lib/ai/prompts/units';
 import { useProfile } from '@/lib/use-profile';
 import { useUnit } from '@/lib/use-unit';
@@ -212,6 +219,12 @@ export default function UnitsPage() {
             onSubmit={handleGenerate}
           />
         </FadeIn>
+
+        {status === 'generating' && !hasPlan && (
+          <FadeInUp delay={0.1} className="mt-8">
+            <LessonsListSkeleton count={4} />
+          </FadeInUp>
+        )}
 
         {error && status === 'error' && (
           <ErrorChip
