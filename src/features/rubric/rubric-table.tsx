@@ -56,17 +56,17 @@ export function RubricTable({
             ))}
           </colgroup>
           <thead>
-            <tr className="bg-surface border-border-subtle border-b">
-              <th className="text-fg-muted px-4 py-3 text-left text-[11px] font-semibold tracking-wide uppercase">
+            <tr className="bg-surface/80 supports-[backdrop-filter]:bg-surface/60 border-border-subtle border-b backdrop-blur">
+              <th className="text-fg-muted px-4 py-2.5 text-left text-[11px] font-semibold tracking-wide uppercase">
                 Criterion
               </th>
               {rubric.levels.map((level) => (
                 <th
                   key={level.id}
-                  className="text-fg-muted border-border-subtle border-l px-4 py-3 text-left text-[11px] font-semibold tracking-wide uppercase"
+                  className="text-fg-muted border-border-subtle border-l px-4 py-2.5 text-left text-[11px] font-semibold tracking-wide uppercase"
                 >
                   <div className="flex flex-col gap-0.5">
-                    <span>{level.name}</span>
+                    <span className="whitespace-nowrap">{level.name}</span>
                     {level.description && (
                       <span className="text-fg-subtle text-[10px] font-normal tracking-normal normal-case">
                         {level.description}
@@ -81,14 +81,16 @@ export function RubricTable({
             {rubric.criteria.map((criterion, idx) => {
               const isBusy = busyCriterionId === criterion.id;
               return (
-                <tr key={criterion.id} className={idx % 2 === 1 ? 'bg-surface/40' : ''}>
+                <tr key={criterion.id} className={`group ${idx % 2 === 1 ? 'bg-surface/40' : ''}`}>
                   <th
                     scope="row"
                     className="border-border-subtle border-t px-4 py-3 text-left align-top"
                   >
                     <div className="flex items-start gap-2">
                       <div className="min-w-0 flex-1">
-                        <div className="text-fg text-sm font-semibold">{criterion.name}</div>
+                        <div className="text-fg text-sm leading-snug font-semibold">
+                          {criterion.name}
+                        </div>
                       </div>
                       <button
                         type="button"
@@ -96,7 +98,11 @@ export function RubricTable({
                         disabled={isBusy || busyCriterionId !== null}
                         title="Regenerate this criterion"
                         aria-label="Regenerate this criterion"
-                        className="border-border-subtle bg-surface text-fg-muted hover:text-fg flex h-6 w-6 shrink-0 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+                        className={`border-border-subtle bg-surface text-fg-muted hover:text-fg flex h-6 w-6 shrink-0 items-center justify-center rounded-md border transition-all duration-(--duration-fast) ease-(--ease-out) disabled:cursor-not-allowed disabled:opacity-40 ${
+                          isBusy
+                            ? 'opacity-100'
+                            : 'opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100'
+                        }`}
                       >
                         {isBusy ? (
                           <Loader2 className="h-3 w-3 animate-spin" />
@@ -127,7 +133,7 @@ export function RubricTable({
                             type="button"
                             onClick={() => startEdit(criterion.id, level.id, value)}
                             disabled={isBusy}
-                            className="text-fg hover:bg-surface w-full rounded-md px-2 py-1.5 text-left text-xs leading-relaxed transition-colors disabled:opacity-50"
+                            className="text-fg hover:bg-surface focus:bg-surface w-full rounded-md px-2 py-1.5 text-left text-xs leading-relaxed transition-colors disabled:opacity-50"
                             title="Click to edit"
                           >
                             {value || <span className="text-fg-subtle italic">empty</span>}
