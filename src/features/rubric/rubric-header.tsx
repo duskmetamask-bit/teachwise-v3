@@ -9,14 +9,20 @@ type RubricHeaderProps = {
 
 export function RubricHeader({ rubric }: RubricHeaderProps) {
   const hasAc9 = rubric.ac9Codes.length > 0;
+  const levelCount = rubric.levels.length;
+  const criterionCount = rubric.criteria.length;
 
   return (
-    <section className="border-border-subtle bg-surface-raised flex flex-col gap-3 rounded-xl border p-5">
+    <section className="border-border-subtle bg-surface-raised flex flex-col gap-4 rounded-xl border p-5">
       <div>
-        <h1 className="text-fg text-2xl font-semibold tracking-tight sm:text-3xl">
+        <h1 className="text-fg text-2xl leading-tight font-semibold tracking-tight sm:text-3xl">
           {rubric.title}
         </h1>
-        <p className="text-fg-muted mt-1 text-sm">{rubric.topic}</p>
+        <p className="text-fg-muted mt-1 text-sm leading-relaxed">{rubric.topic}</p>
+        <p className="text-fg-subtle mt-2 text-[11px]">
+          {levelCount} {levelCount === 1 ? 'level' : 'levels'} · {criterionCount}{' '}
+          {criterionCount === 1 ? 'criterion' : 'criteria'}
+        </p>
       </div>
       {hasAc9 && (
         <div className="flex flex-wrap items-center gap-1.5">
